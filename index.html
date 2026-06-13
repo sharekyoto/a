@@ -1,809 +1,423 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>問いから探す大学検索 | Ask the World</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>問いから探す | Ask the World</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-:root{
-  --ink:#15232B;          /* 墨 */
-  --paper:#F2F5F7;        /* 朝の空 */
-  --card:#FFFFFF;
-  --lapis:#2B4C8C;        /* 瑠璃 — 主役 */
-  --lapis-deep:#1B3260;
-  --amber:#E8A33D;        /* 山吹 — 問いの色 */
-  --mist:#C6D2DB;
-  --quiet:#5B6E7A;
-  --line:#DCE4E9;
-  --radius:14px;
-  --font-display:'Shippori Mincho B1', serif;
-  --font-body:'Zen Kaku Gothic New', sans-serif;
-  --font-data:'IBM Plex Mono', monospace;
-}
-*{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
-  font-family:var(--font-body);
-  background:var(--paper);
-  color:var(--ink);
-  line-height:1.75;
-  -webkit-font-smoothing:antialiased;
-}
-@media (prefers-reduced-motion: reduce){
-  *,*::before,*::after{animation:none!important;transition:none!important}
-}
+  :root{
+    --paper:#FBF7EF; --ink:#1C2A45; --ink-soft:#4A576E;
+    --coral:#E8643C; --teal:#2C7A6B; --line:#E3DBCB; --card:#FFFFFF;
+    --shadow:0 1px 2px rgba(28,42,69,.05), 0 8px 24px rgba(28,42,69,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:"Zen Kaku Gothic New",system-ui,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.6}
+  body[data-lang="en"]{font-family:"Inter","Zen Kaku Gothic New",system-ui,sans-serif}
+  .wrap{max-width:900px;margin:0 auto;padding:clamp(20px,5vw,52px) clamp(16px,4vw,32px)}
+  header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:clamp(20px,4vw,34px)}
+  .brand .eyebrow{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--coral);margin:0 0 6px}
+  .brand h1{font-family:"Fraunces",serif;font-weight:600;font-size:clamp(26px,5.5vw,42px);line-height:1.05;margin:0;letter-spacing:-.01em}
+  .brand .sub{color:var(--ink-soft);font-size:14px;margin-top:9px;max-width:46ch}
+  .lang{flex-shrink:0;display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;font-family:"Space Mono",monospace;font-size:12px}
+  .lang button{border:0;background:transparent;color:var(--ink-soft);padding:7px 13px;cursor:pointer}
+  .lang button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
 
-/* ===== Header ===== */
-header{
-  position:sticky;top:0;z-index:50;
-  background:rgba(242,245,247,.92);
-  backdrop-filter:blur(8px);
-  border-bottom:1px solid var(--line);
-}
-.header-inner{
-  max-width:1080px;margin:0 auto;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:14px 20px;
-}
-.logo{font-family:var(--font-display);font-weight:800;font-size:1.05rem;letter-spacing:.04em}
-.logo .q{color:var(--amber)}
-.lang-toggle{
-  display:flex;border:1.5px solid var(--lapis);border-radius:999px;overflow:hidden;
-  font-family:var(--font-data);font-size:.78rem;
-}
-.lang-toggle button{
-  background:none;border:none;padding:6px 14px;cursor:pointer;
-  font-family:inherit;font-size:inherit;color:var(--lapis);
-}
-.lang-toggle button.active{background:var(--lapis);color:#fff}
-.lang-toggle button:focus-visible{outline:2px solid var(--amber);outline-offset:-2px}
+  .tabs{display:flex;gap:8px;margin-bottom:26px}
+  .tabs button{flex:1;border:1.5px solid var(--line);background:var(--card);color:var(--ink-soft);
+    border-radius:13px;padding:13px;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit}
+  .tabs button[aria-selected="true"]{border-color:var(--ink);background:var(--ink);color:var(--paper)}
 
-/* ===== Demo banner ===== */
-.demo-banner{
-  background:var(--lapis-deep);color:#fff;text-align:center;
-  font-size:.78rem;padding:7px 16px;letter-spacing:.03em;
-}
-.demo-banner strong{color:var(--amber)}
+  .panel{display:none} .panel.on{display:block}
 
-/* ===== Hero ===== */
-.hero{
-  max-width:1080px;margin:0 auto;
-  padding:56px 20px 36px;
-  text-align:center;
-}
-.hero-eyebrow{
-  font-family:var(--font-data);font-size:.75rem;color:var(--quiet);
-  letter-spacing:.18em;text-transform:uppercase;margin-bottom:18px;
-}
-.hero h1{
-  font-family:var(--font-display);font-weight:800;
-  font-size:clamp(1.6rem,5vw,2.6rem);
-  line-height:1.45;letter-spacing:.02em;
-}
-.hero h1 .mark{
-  position:relative;white-space:nowrap;
-}
-.hero h1 .mark::after{
-  content:"";position:absolute;left:0;right:0;bottom:.08em;height:.32em;
-  background:var(--amber);opacity:.35;z-index:-1;border-radius:2px;
-}
-.hero p.lede{
-  margin:18px auto 0;max-width:560px;color:var(--quiet);font-size:.95rem;
-}
+  /* clusters / questions */
+  .cluster{margin-bottom:14px;border:1px solid var(--line);border-radius:16px;background:var(--card);overflow:hidden}
+  .cluster>summary{list-style:none;cursor:pointer;padding:16px 18px;display:flex;align-items:center;gap:12px;font-weight:500}
+  .cluster>summary::-webkit-details-marker{display:none}
+  .cluster .ic{font-size:22px}
+  .cluster .cap{font-family:"Space Mono",monospace;font-size:11px;color:var(--ink-soft);margin-left:auto}
+  .qlist{padding:4px 14px 16px;display:flex;flex-direction:column;gap:8px}
+  .q{text-align:left;cursor:pointer;border:1px solid var(--line);background:var(--paper);border-radius:12px;
+    padding:13px 15px;font-family:"Fraunces",serif;font-size:16.5px;color:var(--ink);line-height:1.35}
+  .q:hover{border-color:var(--coral);color:var(--coral);transform:translateX(2px);transition:.15s}
 
-/* ===== 問いのチケッター(signature) ===== */
-.toi-ticker{
-  margin:30px auto 0;max-width:640px;
-  font-family:var(--font-display);font-weight:600;
-  font-size:clamp(1rem,3vw,1.25rem);
-  min-height:2.2em;color:var(--lapis-deep);
-}
-.toi-ticker .toi-text{display:inline-block;animation:toiIn .6s ease}
-.toi-ticker .qmark{color:var(--amber);font-weight:800}
-@keyframes toiIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  /* school search */
+  .search{display:flex;gap:10px;flex-wrap:wrap}
+  .search input{flex:1;min-width:220px;border:1.5px solid var(--line);background:var(--card);border-radius:14px;padding:15px 18px;font-size:16px;color:var(--ink);font-family:inherit}
+  .search input:focus{outline:none;border-color:var(--coral);box-shadow:0 0 0 4px rgba(232,100,60,.12)}
+  .search button{border:0;background:var(--ink);color:var(--paper);border-radius:14px;padding:0 24px;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit}
+  .hint{color:var(--ink-soft);font-size:13px;margin:11px 2px 0}
+  .inst{display:flex;align-items:center;gap:14px;width:100%;text-align:left;cursor:pointer;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:10px;font-family:inherit}
+  .inst:hover{border-color:var(--coral)} .inst .flag{font-size:24px} .inst .nm{font-weight:500;font-size:16px}
+  .inst .meta{color:var(--ink-soft);font-size:12.5px;font-family:"Space Mono",monospace}
 
-/* ===== Search ===== */
-.search-wrap{max-width:640px;margin:22px auto 0;position:relative}
-.search-box{
-  width:100%;padding:16px 52px 16px 20px;
-  font-family:var(--font-body);font-size:1rem;
-  border:2px solid var(--lapis);border-radius:999px;
-  background:var(--card);color:var(--ink);
-}
-.search-box:focus{outline:3px solid rgba(232,163,61,.45);outline-offset:2px}
-.search-icon{
-  position:absolute;right:8px;top:50%;transform:translateY(-50%);
-  width:38px;height:38px;border-radius:50%;border:none;cursor:pointer;
-  background:var(--lapis);color:#fff;font-size:1rem;
-}
-.chips{
-  max-width:760px;margin:18px auto 0;
-  display:flex;flex-wrap:wrap;gap:8px;justify-content:center;
-}
-.chip{
-  font-size:.82rem;padding:7px 14px;border-radius:999px;cursor:pointer;
-  border:1px solid var(--mist);background:var(--card);color:var(--ink);
-  font-family:var(--font-body);transition:border-color .15s, background .15s;
-}
-.chip:hover{border-color:var(--lapis)}
-.chip.active{background:var(--lapis);border-color:var(--lapis);color:#fff}
-.chip:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+  /* shared results */
+  .crumb{display:flex;align-items:center;gap:10px;margin:6px 0 4px;flex-wrap:wrap}
+  .back{border:0;background:transparent;color:var(--coral);cursor:pointer;font-family:"Space Mono",monospace;font-size:13px;padding:4px 0}
+  .head{margin:14px 0 4px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .head .flag{font-size:28px}
+  .head h2{font-family:"Fraunces",serif;font-weight:600;font-size:clamp(21px,4vw,28px);margin:0;line-height:1.2}
+  .head .count{font-family:"Space Mono",monospace;font-size:12px;color:var(--ink-soft)}
+  .note{color:var(--ink-soft);font-size:12.5px;margin:3px 0 20px;max-width:62ch}
+  .status{margin-top:22px;color:var(--ink-soft);font-size:14px} .status.err{color:var(--coral)}
 
-/* ===== Filters ===== */
-.filters{
-  max-width:1080px;margin:34px auto 0;padding:0 20px;
-  display:flex;flex-wrap:wrap;gap:10px;align-items:center;
-}
-.filters .label{
-  font-family:var(--font-data);font-size:.72rem;color:var(--quiet);
-  letter-spacing:.12em;margin-right:2px;
-}
-.result-count{
-  max-width:1080px;margin:14px auto 0;padding:0 20px;
-  font-family:var(--font-data);font-size:.78rem;color:var(--quiet);
-}
-
-/* ===== Cards ===== */
-.grid{
-  max-width:1080px;margin:14px auto 60px;padding:0 20px;
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:18px;
-}
-.card{
-  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
-  padding:22px 22px 18px;display:flex;flex-direction:column;gap:10px;
-  transition:transform .15s ease, box-shadow .15s ease;
-}
-.card:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(21,35,43,.09)}
-.card .toi{
-  font-family:var(--font-display);font-weight:600;font-size:1.02rem;
-  line-height:1.6;color:var(--lapis-deep);
-}
-.card .toi::before{content:"Q.";color:var(--amber);font-weight:800;margin-right:.4em;font-family:var(--font-data)}
-.card .who{font-size:.86rem;color:var(--quiet)}
-.archive-badge{
-  align-self:flex-start;font-family:var(--font-data);font-size:.68rem;
-  padding:2px 10px;border-radius:999px;letter-spacing:.08em;
-  background:#EFE9DC;color:#8A6D1F;border:1px solid #DCC98F;
-}
-.card .moved{color:var(--lapis);font-weight:700;font-size:.82rem}
-.card .who b{color:var(--ink);font-weight:700}
-.card .summary{font-size:.88rem}
-.card .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
-.tag{
-  font-size:.72rem;padding:3px 10px;border-radius:999px;
-  background:var(--paper);border:1px solid var(--line);color:var(--quiet);
-}
-.sources{
-  margin-top:auto;padding-top:12px;border-top:1px dashed var(--line);
-  font-family:var(--font-data);font-size:.72rem;color:var(--quiet);
-}
-.sources .src-label{letter-spacing:.1em;margin-bottom:4px}
-.sources a{color:var(--lapis);text-decoration:none;border-bottom:1px solid var(--mist)}
-.sources a:hover{border-bottom-color:var(--lapis)}
-.sources .checked{display:block;margin-top:5px;color:#7E8E98}
-.sources .checked::before{content:"⟳ "}
-.empty{
-  grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--quiet);
-}
-.empty .big{font-family:var(--font-display);font-size:1.2rem;color:var(--ink);margin-bottom:8px}
-
-/* ===== How it updates ===== */
-.howto{
-  background:var(--lapis-deep);color:#E8EEF4;
-  padding:56px 20px 64px;margin-top:20px;
-}
-.howto-inner{max-width:880px;margin:0 auto}
-.howto h2{
-  font-family:var(--font-display);font-weight:800;font-size:1.4rem;
-  margin-bottom:8px;
-}
-.howto h2 .q{color:var(--amber)}
-.howto .sub{font-size:.88rem;color:#AFC2D4;margin-bottom:28px}
-.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
-.step{
-  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);
-  border-radius:var(--radius);padding:18px;
-}
-.step .step-tag{
-  font-family:var(--font-data);font-size:.7rem;letter-spacing:.14em;
-  color:var(--amber);margin-bottom:8px;
-}
-.step h3{font-size:.95rem;font-weight:700;margin-bottom:6px;color:#fff}
-.step p{font-size:.82rem;color:#C3D2E0}
-.step a{color:var(--amber);text-decoration:none;border-bottom:1px solid rgba(232,163,61,.4)}
-footer{
-  text-align:center;font-family:var(--font-data);font-size:.72rem;
-  color:var(--quiet);padding:26px 20px;
-}
-
-/* ===== もっと見る / OpenAlex live fetch ===== */
-.univ-section{
-  max-width:1080px;margin:0 auto 40px;padding:0 20px;
-}
-.univ-section-header{
-  display:flex;align-items:center;justify-content:space-between;
-  border-bottom:2px solid var(--lapis);padding-bottom:10px;margin-bottom:16px;
-}
-.univ-section-header h2{
-  font-family:var(--font-display);font-weight:800;font-size:1rem;
-  color:var(--lapis-deep);
-}
-.univ-section-header .univ-count{
-  font-family:var(--font-data);font-size:.72rem;color:var(--quiet);
-}
-.load-more-btn{
-  display:flex;align-items:center;gap:8px;
-  background:none;border:1.5px solid var(--lapis);border-radius:999px;
-  padding:8px 20px;font-family:var(--font-body);font-size:.85rem;
-  color:var(--lapis);cursor:pointer;margin:20px auto;
-  transition:background .15s,color .15s;
-}
-.load-more-btn:hover{background:var(--lapis);color:#fff}
-.load-more-btn:disabled{opacity:.5;cursor:wait}
-.load-more-btn .spinner{
-  width:14px;height:14px;border:2px solid currentColor;
-  border-top-color:transparent;border-radius:50%;
-  animation:spin .7s linear infinite;display:none;
-}
-.load-more-btn.loading .spinner{display:block}
-.load-more-btn.loading .btn-text{display:none}
-@keyframes spin{to{transform:rotate(360deg)}}
-.raw-card{
-  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
-  padding:18px 20px 14px;display:flex;flex-direction:column;gap:8px;
-}
-.raw-card .rc-name{font-weight:700;font-size:.95rem}
-.raw-card .rc-topics{font-size:.82rem;color:var(--quiet)}
-.raw-card .rc-src{
-  margin-top:auto;padding-top:10px;border-top:1px dashed var(--line);
-  font-family:var(--font-data);font-size:.70rem;color:var(--quiet);
-}
-.raw-card .rc-src a{color:var(--lapis);text-decoration:none;border-bottom:1px solid var(--mist)}
-.raw-card .rc-note{font-size:.75rem;color:var(--quiet);font-style:italic}
-.live-grid{
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;
-}
-
-@media (max-width:480px){
-  .hero{padding-top:40px}
-  .grid{grid-template-columns:1fr}
-}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:19px 21px;margin-bottom:13px;box-shadow:var(--shadow)}
+  .card .top{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+  .card .name{font-family:"Fraunces",serif;font-weight:600;font-size:19px;margin:0;line-height:1.2}
+  .card .name a{color:var(--ink);text-decoration:none} .card .name a:hover{color:var(--coral)}
+  .card .aff{font-size:12.5px;color:var(--ink-soft);margin-top:3px}
+  .stats{display:flex;gap:15px;flex-shrink:0;font-family:"Space Mono",monospace;font-size:11px;color:var(--ink-soft);text-align:right}
+  .stats b{display:block;font-size:15px;color:var(--ink);font-weight:700}
+  .topics{margin-top:13px;display:flex;flex-wrap:wrap;gap:7px}
+  .chip{font-size:12.5px;background:rgba(44,122,107,.09);color:var(--teal);border:1px solid rgba(44,122,107,.22);border-radius:999px;padding:4px 11px}
+  .links{margin-top:13px;display:flex;gap:14px;font-size:13px;font-family:"Space Mono",monospace}
+  .links a{color:var(--coral);text-decoration:none} .links a:hover{text-decoration:underline}
+  .more{display:block;margin:8px auto 0;border:1.5px solid var(--ink);background:transparent;color:var(--ink);border-radius:14px;padding:12px 28px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit}
+  .more:hover{background:var(--ink);color:var(--paper)} .more:disabled{opacity:.4}
+  .spin{display:inline-block;width:15px;height:15px;border:2px solid var(--line);border-top-color:var(--coral);border-radius:50%;animation:s .7s linear infinite;vertical-align:-2px;margin-right:8px}
+  @keyframes s{to{transform:rotate(360deg)}}
+  footer{margin-top:42px;padding-top:18px;border-top:1px solid var(--line);color:var(--ink-soft);font-size:12px;font-family:"Space Mono",monospace}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
-<body>
-
-<div class="demo-banner" id="demoBanner"></div>
-
-<header>
-  <div class="header-inner">
-    <div class="logo">問い<span class="q">?</span>から探す大学検索 <span style="font-family:var(--font-data);font-size:.7rem;color:var(--quiet)">/ Ask the World</span></div>
-    <div class="lang-toggle" role="group" aria-label="Language">
-      <button id="btnJa" class="active" onclick="setLang('ja')">日本語</button>
-      <button id="btnEn" onclick="setLang('en')">EN</button>
+<body data-lang="ja">
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <p class="eyebrow" data-i="eyebrow"></p>
+      <h1 data-i="title"></h1>
+      <p class="sub" data-i="sub"></p>
     </div>
+    <div class="lang" role="group" aria-label="language">
+      <button data-set="ja" aria-pressed="true">JP</button>
+      <button data-set="en" aria-pressed="false">EN</button>
+    </div>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button id="t-k" role="tab" aria-selected="true" data-i="tab_k"></button>
+    <button id="t-q" role="tab" aria-selected="false" data-i="tab_q"></button>
+    <button id="t-s" role="tab" aria-selected="false" data-i="tab_s"></button>
   </div>
-</header>
 
-<section class="hero">
-  <div class="hero-eyebrow" id="eyebrow"></div>
-  <h1 id="heroTitle"></h1>
-  <p class="lede" id="heroLede"></p>
-  <div class="toi-ticker" aria-live="polite"><span class="toi-text" id="tickerText"></span></div>
-  <div class="search-wrap">
-    <input type="search" class="search-box" id="searchBox" autocomplete="off">
-    <button class="search-icon" aria-label="Search" onclick="render()">→</button>
-  </div>
-  <div class="chips" id="questionChips"></div>
-</section>
+  <!-- キーワードから探す -->
+  <section id="p-k" class="panel on">
+    <div class="search">
+      <input id="kq" type="text" autocomplete="off" />
+      <button id="kgo" data-i="kgo"></button>
+    </div>
+    <p class="hint" data-i="khint2"></p>
+    <div id="kresults"></div>
+  </section>
 
-<div class="filters" id="fieldFilters"></div>
-<div class="filters" id="regionFilters" style="margin-top:10px"></div>
-<div class="result-count" id="resultCount"></div>
+  <!-- 問いから探す -->
+  <section id="p-q" class="panel">
+    <div id="qtree"></div>
+    <div id="qresults"></div>
+  </section>
 
-<main class="grid" id="grid"></main>
+  <!-- 学校から探す -->
+  <section id="p-s" class="panel">
+    <div class="search">
+      <input id="q" type="text" autocomplete="off" />
+      <button id="go" data-i="go"></button>
+    </div>
+    <p class="hint" data-i="hint"></p>
+    <div id="status" class="status" hidden></div>
+    <div id="pick"></div>
+    <div id="sresults"></div>
+  </section>
 
-<div id="liveSection"></div>
-
-<section class="howto">
-  <div class="howto-inner">
-    <h2 id="howtoTitle"></h2>
-    <p class="sub" id="howtoSub"></p>
-    <div class="steps" id="steps"></div>
-  </div>
-</section>
-
-<footer id="footerText"></footer>
+  <footer data-i="foot"></footer>
+</div>
 
 <script>
-/* =========================================================
-   問いから探す大学検索 — プロトタイプ
-   実運用では professors[] を OpenAlex / researchmap / KAKEN
-   から自動生成した JSON に差し替える(下部「更新の仕組み」参照)
-========================================================= */
+const API="https://api.openalex.org";
+const MAILTO="sharekyoto@gmail.com";
 
-let lang = 'ja';
-let activeField = 'all';
-let activeRegion = 'all';
-
-const ui = {
-  ja: {
-    banner: '⚠ これは<b>デモデータ</b>による試作版です。研究者は架空ですが、実運用では <strong>OpenAlex・researchmap・KAKEN</strong> の実データに自動接続されます。',
-    eyebrow: 'FOR 15–17 YEAR OLDS — EXPLORE BEFORE YOU CHOOSE',
-    title: '偏差値ではなく、<span class="mark">心が動く問い</span>から<br>大学と学部を探そう。',
-    lede: '世界中の大学の先生たちは、それぞれ一つの「問い」を追いかけています。きみの問いに近い研究者を見つけることが、学部選びのいちばん確かな方法です。',
-    searchPlaceholder: '気になる言葉を入力(例:眠り、ゲーム、気候、ことば…)',
-    chipsLabel: ['なぜ人は眠るの?','AIは友だちになれる?','海はあと何年もつ?','お金より大事なものは測れる?','ことばが先か、考えが先か?','宇宙のはじまりは見える?'],
-    fieldLabel: '分野でしぼる',
-    regionLabel: '地域でしぼる',
-    fields: {all:'すべて', life:'生命・脳', ai:'AI・情報', earth:'地球・環境', society:'社会・経済', humanities:'人文・ことば', space:'宇宙・物質'},
-    regions: {all:'世界中', jp:'日本', world:'海外'},
-    results: n => `${n} 人の研究者が見つかりました`,
-    emptyBig: 'この問いの研究者は、まだここにいません。',
-    emptyText: 'けれど世界のどこかには必ずいます。別の言葉で探してみてください。',
-    liveBanner: n => `✅ 本番データで稼働中:<b>${n}人</b>の研究者(OpenAlex / researchmap 由来・週次自動更新・アーカイブ含む)`,
-    archiveTag: 'アーカイブ',
-    archiveNote: 'この情報は最終確認日時点のものです',
-    movedTo: n => `現在の所属 → ${n}`,
-    moreBtn: n => `この大学の研究者をもっと見る(OpenAlexから直接取得)`,
-    moreBtnLoading: 'OpenAlexから取得中...',
-    moreBtnDone: n => `さらに ${n} 人を取得 — AI要約なし・出典はOpenAlex`,
-    rawTopics: 'OpenAlexの研究トピック(AI要約前)',
-    noMore: 'これ以上の研究者データは見つかりませんでした',
-    srcLabel: 'SOURCES(出典)',
-    checked: d => `最終確認: ${d}(ソース更新時に自動再取得)`,
-    howtoTitle: 'このサイトはどうやって<span class="q">自動で</span>進化し続けるの?',
-    howtoSub: '無料で公開され続けるために、データもコストも「自走する」設計になっています。',
-    steps: [
-      {tag:'STEP 1 / DATA', h:'世界の研究データに接続', p:'OpenAlex(全世界2.5億件超の論文・研究者データ、無料・オープン)と、日本の researchmap / KAKEN(国の研究者データベース)から取得します。'},
-      {tag:'STEP 2 / SYNC', h:'差分だけを毎週同期', p:'OpenAlex の「更新日フィルタ」で、前回以降に変わった研究者・論文だけを取得。GitHub Actions(無料枠)で毎週自動実行されます。'},
-      {tag:'STEP 3 / TRANSLATE', h:'論文の言葉を「問い」に翻訳', p:'専門用語だらけの研究概要を、AIが中高生に届く一つの「問い」と3行の説明に書き直します。生成結果はキャッシュされ、変更があった研究者だけ再生成。'},
-      {tag:'STEP 4 / TRUST', h:'出典と確認日を必ず表示', p:'すべてのカードに元データへのリンクと最終確認日を表示。AIの要約が間違っていないか、いつでも一次情報にさかのぼれます。'}
-    ],
-    footer: 'PROTOTYPE v0.1 — data: demo / production: OpenAlex (CC0) + researchmap + KAKEN — cost design: static hosting (¥0) + free APIs'
-  },
-  en: {
-    banner: '⚠ This is a prototype with <b>demo data</b>. Researchers shown are fictional; the production version connects automatically to <strong>OpenAlex, researchmap and KAKEN</strong>.',
-    eyebrow: 'FOR 15–17 YEAR OLDS — EXPLORE BEFORE YOU CHOOSE',
-    title: 'Choose a university by the <span class="mark">question that moves you</span>,<br>not by its ranking.',
-    lede: 'Every professor in the world is chasing one question. Finding a researcher whose question feels like yours is the most reliable way to choose what to study.',
-    searchPlaceholder: 'Type anything (e.g. sleep, games, climate, language…)',
-    chipsLabel: ['Why do we sleep?','Can AI be a friend?','How many years does the ocean have?','Can we measure what matters more than money?','Which comes first: words or thoughts?','Can we see the beginning of the universe?'],
-    fieldLabel: 'Filter by field',
-    regionLabel: 'Filter by region',
-    fields: {all:'All', life:'Life & Brain', ai:'AI & Computing', earth:'Earth & Climate', society:'Society & Economics', humanities:'Humanities & Language', space:'Space & Matter'},
-    regions: {all:'Worldwide', jp:'Japan', world:'Overseas'},
-    results: n => `${n} researchers found`,
-    emptyBig: 'No researcher here yet for this question.',
-    emptyText: 'But somewhere in the world, there is one. Try different words.',
-    liveBanner: n => `✅ Live data: <b>${n}</b> researchers (from OpenAlex / researchmap, auto-synced weekly, archive included)`,
-    archiveTag: 'Archived',
-    archiveNote: 'Information as of the last verified date',
-    movedTo: n => `Now at → ${n}`,
-    moreBtn: n => `See more researchers from this university (live from OpenAlex)`,
-    moreBtnLoading: 'Fetching from OpenAlex...',
-    moreBtnDone: n => `${n} more researchers loaded — no AI summary yet · source: OpenAlex`,
-    rawTopics: 'Research topics from OpenAlex (pre-AI summary)',
-    noMore: 'No more researcher data found',
-    srcLabel: 'SOURCES',
-    checked: d => `Last verified: ${d} (auto-refreshed when sources change)`,
-    howtoTitle: 'How does this site keep <span class="q">evolving on its own</span>?',
-    howtoSub: 'To stay free forever, both the data and the costs are designed to run themselves.',
-    steps: [
-      {tag:'STEP 1 / DATA', h:'Connect to the world\'s research data', p:'We pull from OpenAlex (250M+ open records of papers and researchers, free) plus Japan\'s researchmap / KAKEN national databases.'},
-      {tag:'STEP 2 / SYNC', h:'Sync only what changed, weekly', p:'OpenAlex\'s updated-date filter lets us fetch only researchers and papers changed since last time. GitHub Actions (free tier) runs it weekly.'},
-      {tag:'STEP 3 / TRANSLATE', h:'Turn papers into questions', p:'AI rewrites jargon-heavy abstracts into one question and three plain lines a 15-year-old can feel. Results are cached; only changed researchers are regenerated.'},
-      {tag:'STEP 4 / TRUST', h:'Always show sources and dates', p:'Every card links to the original data with a last-verified date, so you can always check the primary source behind any AI summary.'}
-    ],
-    footer: 'PROTOTYPE v0.1 — data: demo / production: OpenAlex (CC0) + researchmap + KAKEN — cost design: static hosting ($0) + free APIs'
-  }
+const T={
+  ja:{eyebrow:"問いから、世界の師匠へ", title:"問いから探す大学検索",
+    sub:"心が動く問いをひとつ選ぶと、それを探究している世界の研究者に出会えます。",
+    tab_q:"問いから探す", tab_s:"学校から探す", tab_k:"キーワードで探す",
+    kgo:"探す", khint:"気になる言葉（例:再生医療、ブラックホール、AI）",
+    khint2:"気になる言葉を入れると、それを研究している先生が活動量順に出ます。言葉が浮かばないときは「問いから探す」へ。",
+    knone:"その言葉に近い先生はまだ見つかりませんでした。別の言い方や「問いから探す」も試してみてください。",
+    kcount:"人の先生",
+    go:"探す", hint:"例:京都大学 / MIT / ETH Zurich / Universidade de São Paulo",
+    pick:"どの学校ですか?", searching:"学校をさがしています…", loading:"よみこんでいます…",
+    none:"見つかりませんでした。英語名でも試してみてください。", nores:"この学校の研究者はまだ見つかりませんでした。",
+    err:"うまく接続できませんでした。少し待ってもう一度。",
+    count:"人", more:"もっと見る", back:"← 問いにもどる",
+    qnote:"この問いとつながる分野の研究者を、活動量の多い順に表示しています。", inthis:"の研究者",
+    works:"論文", cited:"被引用", h:"h指数", profile:"OpenAlex",
+    foot:"データ: OpenAlex（CC0・全世界）"},
+  en:{eyebrow:"From a question to a mentor", title:"Ask the World",
+    sub:"Pick a question that moves you, and meet researchers exploring it around the world.",
+    tab_q:"By question", tab_s:"By school", tab_k:"By keyword",
+    kgo:"Search", khint:"a word you're curious about (e.g. regenerative medicine, black holes, AI)",
+    khint2:"Type a word and meet researchers working on it, sorted by activity. Not sure what to type? Try 'By question'.",
+    knone:"No close match yet. Try another wording, or 'By question'.",
+    kcount:"researchers",
+    go:"Search", hint:"e.g. Kyoto University / MIT / ETH Zurich / Universidade de São Paulo",
+    pick:"Which one?", searching:"Looking up the school…", loading:"Loading…",
+    none:"No match. Try the English name.", nores:"No researchers found for this school yet.",
+    err:"Couldn't connect. Try again in a moment.",
+    count:"", more:"Show more", back:"← Back to questions",
+    qnote:"Researchers in fields connected to this question, sorted by research activity.", inthis:"researchers",
+    works:"works", cited:"cited", h:"h-index", profile:"OpenAlex",
+    foot:"Data: OpenAlex (CC0 · global)"}
 };
+let lang="ja", SITE=null, QDATA=null;
 
-/* ---- デモデータ(実運用では自動生成JSONに置換) ---- */
-const demoProfessors = [
-  {field:'life', region:'jp',
-   toi:{ja:'なぜ生き物は、命がけで眠るのだろう?', en:'Why do living things risk their lives to sleep?'},
-   name:{ja:'青山 ハルカ(架空)', en:'Haruka Aoyama (fictional)'},
-   aff:{ja:'筑波大学・国際統合睡眠医科学研究機構', en:'Univ. of Tsukuba, Intl. Institute for Integrative Sleep Medicine'},
-   sum:{ja:'眠っている間、脳は記憶を整理し、自分を修復しています。マウスの脳を観察しながら「眠気の正体」という未解決の謎に挑んでいます。', en:'While we sleep, the brain sorts memories and repairs itself. This lab watches mouse brains to chase one unsolved mystery: what sleepiness actually is.'},
-   tags:{ja:['脳科学','睡眠','医学部・生命科学'], en:['Neuroscience','Sleep','Medicine / Life Sciences']},
-   sources:[{label:'researchmap', url:'https://researchmap.jp'},{label:'KAKEN', url:'https://kaken.nii.ac.jp'},{label:'OpenAlex', url:'https://openalex.org'}], checked:'2026-06-08'},
+/* ---- fallback sample so the page renders before the pipeline runs ---- */
+const SAMPLE_QUESTIONS={clusters:[
+  {id:"sky",icon:"🌌",label:{ja:"そら と うちゅう",en:"Sky & Universe"},questions:[
+    {id:"u",q:{ja:"宇宙は、どこまで広がっているんだろう？",en:"How far does the universe stretch?"},fields:["31","19"]}]},
+  {id:"life",icon:"🧬",label:{ja:"いのち と からだ",en:"Life & Body"},questions:[
+    {id:"b",q:{ja:"脳は、どうやって考えているの？",en:"How does the brain think?"},fields:["28","32"]}]},
+  {id:"logic",icon:"🔢",label:{ja:"かず・情報",en:"Numbers & Data"},questions:[
+    {id:"ai",q:{ja:"AIは、どんな仕組みで「考える」の？",en:"How does AI 'think'?"},fields:["17"]}]}
+]};
+const SAMPLE_SITE={researchers:[
+  {id:"S1",name:"(sample) Aiko Tanaka",inst:"Kyoto University",country:"JP",works:120,cited:9000,h:42,topics:["Quantum Optics","Photonics"],fields:["31"]},
+  {id:"S2",name:"(sample) John Rivera",inst:"MIT",country:"US",works:90,cited:7000,h:38,topics:["Machine Learning","Neural Networks"],fields:["17"]},
+  {id:"S3",name:"(sample) Sofia Müller",inst:"ETH Zurich",country:"CH",works:75,cited:5200,h:33,topics:["Cognitive Neuroscience"],fields:["28","32"]}
+]};
 
-  {field:'ai', region:'world',
-   toi:{ja:'AIは、人の気持ちを本当に理解できるのか?', en:'Can AI truly understand how people feel?'},
-   name:{ja:'M. オコンクウォ(架空)', en:'M. Okonkwo (fictional)'},
-   aff:{ja:'MIT メディアラボ(アメリカ)', en:'MIT Media Lab (USA)'},
-   sum:{ja:'感情を読み取るAIを作りながら、「理解しているフリ」と「本当の理解」の境界線を研究。哲学と工学が混ざり合う分野です。', en:'Builds emotion-reading AI while studying the line between pretending to understand and truly understanding — where philosophy meets engineering.'},
-   tags:{ja:['AI','感情コンピューティング','情報科学・哲学'], en:['AI','Affective Computing','CS / Philosophy']},
-   sources:[{label:'OpenAlex', url:'https://openalex.org'},{label:'ORCID', url:'https://orcid.org'}], checked:'2026-06-10'},
+function flag(cc){ if(!cc||cc.length!==2) return "🌐";
+  return String.fromCodePoint(...[...cc.toUpperCase()].map(c=>127397+c.charCodeAt(0))); }
 
-  {field:'earth', region:'world',
-   toi:{ja:'サンゴ礁は、あと何年「家」でいられるのか?', en:'How many more years can coral reefs stay a home?'},
-   name:{ja:'L. フェルナンデス(架空)', en:'L. Fernandez (fictional)'},
-   aff:{ja:'クイーンズランド大学(オーストラリア)', en:'Univ. of Queensland (Australia)'},
-   sum:{ja:'海水温の上昇でサンゴが白くなる「白化」を追跡。熱に強いサンゴを探して移植する、海の救急医のような研究です。', en:'Tracks coral bleaching as seas warm, and searches for heat-resistant corals to transplant — like an ER doctor for the ocean.'},
-   tags:{ja:['海洋生物学','気候変動','理学部・環境'], en:['Marine Biology','Climate','Science / Environment']},
-   sources:[{label:'OpenAlex', url:'https://openalex.org'},{label:'Lab site', url:'https://www.uq.edu.au'}], checked:'2026-06-05'},
-
-  {field:'society', region:'jp',
-   toi:{ja:'「幸せ」は、GDPの代わりに測れるのか?', en:'Can happiness be measured instead of GDP?'},
-   name:{ja:'三谷 ソウタ(架空)', en:'Sota Mitani (fictional)'},
-   aff:{ja:'京都大学・経済学研究科', en:'Kyoto University, Graduate School of Economics'},
-   sum:{ja:'お金の量ではなく「人生の満足度」で社会の豊かさを測り直す幸福の経済学。アンケートとデータ分析で政策を変えようとしています。', en:'Economics of happiness: re-measuring a society\'s wealth by life satisfaction, not money — using surveys and data to change policy.'},
-   tags:{ja:['経済学','ウェルビーイング','経済学部'], en:['Economics','Well-being','Economics Dept.']},
-   sources:[{label:'researchmap', url:'https://researchmap.jp'},{label:'KAKEN', url:'https://kaken.nii.ac.jp'}], checked:'2026-06-09'},
-
-  {field:'humanities', region:'world',
-   toi:{ja:'ことばが先か、考えが先か?', en:'Which comes first — words, or thoughts?'},
-   name:{ja:'A. リンドグレン(架空)', en:'A. Lindgren (fictional)'},
-   aff:{ja:'エディンバラ大学(イギリス)', en:'Univ. of Edinburgh (UK)'},
-   sum:{ja:'母語によって時間や色の感じ方が変わるのかを実験で確かめる言語心理学。文学部と理系実験が出会う場所です。', en:'Psycholinguistics: testing whether your native language changes how you perceive time and color — where humanities meet lab experiments.'},
-   tags:{ja:['言語学','認知科学','文学部・心理'], en:['Linguistics','Cognitive Science','Humanities / Psych']},
-   sources:[{label:'OpenAlex', url:'https://openalex.org'},{label:'ORCID', url:'https://orcid.org'}], checked:'2026-06-07'},
-
-  {field:'space', region:'jp',
-   toi:{ja:'宇宙の「最初の光」は、まだ見えるのか?', en:'Can we still see the universe\'s first light?'},
-   name:{ja:'早瀬 ミナト(架空)', en:'Minato Hayase (fictional)'},
-   aff:{ja:'東京大学・カブリ数物連携宇宙研究機構', en:'Univ. of Tokyo, Kavli IPMU'},
-   sum:{ja:'138億年前のビッグバンの名残「宇宙背景放射」を観測し、宇宙の始まりの設計図を読み解こうとしています。', en:'Observes the cosmic microwave background — the 13.8-billion-year-old afterglow of the Big Bang — to read the universe\'s blueprint.'},
-   tags:{ja:['宇宙物理','観測','理学部・物理'], en:['Astrophysics','Observation','Physics Dept.']},
-   sources:[{label:'researchmap', url:'https://researchmap.jp'},{label:'OpenAlex', url:'https://openalex.org'}], checked:'2026-06-11'},
-
-  {field:'ai', region:'jp',
-   toi:{ja:'ゲームのAIは、人を成長させる先生になれるか?', en:'Can game AI become a teacher that helps people grow?'},
-   name:{ja:'桐生 レン(架空)', en:'Ren Kiryu (fictional)'},
-   aff:{ja:'大阪大学・基礎工学研究科', en:'Osaka University, Graduate School of Engineering Science'},
-   sum:{ja:'プレイヤーのつまずきを察知して難易度や助言を変えるAIを研究。ゲームデザインと教育工学が合流する新しい分野です。', en:'Builds AI that senses where a player struggles and adapts difficulty and hints — a new field where game design meets education.'},
-   tags:{ja:['ゲームAI','教育工学','情報・工学部'], en:['Game AI','EdTech','Informatics / Engineering']},
-   sources:[{label:'researchmap', url:'https://researchmap.jp'},{label:'KAKEN', url:'https://kaken.nii.ac.jp'}], checked:'2026-06-06'},
-
-  {field:'life', region:'world',
-   toi:{ja:'老いは病気なのか、それとも運命なのか?', en:'Is aging a disease — or destiny?'},
-   name:{ja:'S. チェン(架空)', en:'S. Chen (fictional)'},
-   aff:{ja:'ハーバード大学・医学部(アメリカ)', en:'Harvard Medical School (USA)'},
-   sum:{ja:'細胞が老いる仕組みを分子レベルで解明し、「老化は治療できるのか」という人類最古の問いに実験で挑みます。', en:'Decodes how cells age at the molecular level, taking on humanity\'s oldest question — can aging be treated? — with experiments.'},
-   tags:{ja:['老化生物学','医学','医学部・生命科学'], en:['Biology of Aging','Medicine','Medicine / Life Sciences']},
-   sources:[{label:'OpenAlex', url:'https://openalex.org'},{label:'ORCID', url:'https://orcid.org'}], checked:'2026-06-04'},
-
-  {field:'earth', region:'jp',
-   toi:{ja:'次の巨大地震を、何分前に知れるか?', en:'How many minutes before the next big quake can we know?'},
-   name:{ja:'波多野 ユイ(架空)', en:'Yui Hatano (fictional)'},
-   aff:{ja:'東北大学・災害科学国際研究所', en:'Tohoku University, IRIDeS'},
-   sum:{ja:'海底のひずみデータとAIを組み合わせ、地震発生の予兆を探す研究。1分の猶予が何千人の命を変えます。', en:'Combines seafloor strain data with AI to hunt for earthquake precursors. One extra minute of warning can change thousands of lives.'},
-   tags:{ja:['地震学','防災','理学部・工学部'], en:['Seismology','Disaster Prevention','Science / Engineering']},
-   sources:[{label:'researchmap', url:'https://researchmap.jp'},{label:'KAKEN', url:'https://kaken.nii.ac.jp'}], checked:'2026-06-10'},
-
-  {field:'society', region:'world',
-   toi:{ja:'SNSは民主主義を壊すのか、鍛えるのか?', en:'Does social media break democracy — or train it?'},
-   name:{ja:'D. コワルスキ(架空)', en:'D. Kowalski (fictional)'},
-   aff:{ja:'オックスフォード大学・インターネット研究所(イギリス)', en:'Oxford Internet Institute (UK)'},
-   sum:{ja:'数億件の投稿データから、世論がどう生まれ、どう操作されるかを分析。政治学とデータ科学のハイブリッドです。', en:'Analyzes hundreds of millions of posts to see how public opinion forms — and how it gets manipulated. Political science meets data science.'},
-   tags:{ja:['計算社会科学','政治学','社会学部・情報'], en:['Computational Social Science','Politics','Sociology / Informatics']},
-   sources:[{label:'OpenAlex', url:'https://openalex.org'},{label:'Lab site', url:'https://www.oii.ox.ac.uk'}], checked:'2026-06-08'},
-
-  {field:'humanities', region:'jp',
-   toi:{ja:'千年前の物語は、なぜ今も心に効くのか?', en:'Why do thousand-year-old stories still work on our hearts?'},
-   name:{ja:'小野寺 アカリ(架空)', en:'Akari Onodera (fictional)'},
-   aff:{ja:'早稲田大学・文学学術院', en:'Waseda University, Faculty of Letters'},
-   sum:{ja:'源氏物語をデータ分析と心理学で読み直し、「物語が人を癒す仕組み」を探る新しい古典研究です。', en:'Re-reads The Tale of Genji with data analysis and psychology, asking how stories heal people — a new kind of classics research.'},
-   tags:{ja:['日本文学','デジタル人文学','文学部'], en:['Japanese Literature','Digital Humanities','Letters']},
-   sources:[{label:'researchmap', url:'https://researchmap.jp'},{label:'CiNii', url:'https://cir.nii.ac.jp'}], checked:'2026-06-03'},
-
-  {field:'space', region:'world',
-   toi:{ja:'人類は火星で「ふつうに暮らせる」のか?', en:'Could humans live an ordinary life on Mars?'},
-   name:{ja:'R. アルバレス(架空)', en:'R. Alvarez (fictional)'},
-   aff:{ja:'チューリッヒ工科大学(スイス)', en:'ETH Zürich (Switzerland)'},
-   sum:{ja:'火星の土から建材や酸素を作る技術を研究。宇宙工学と化学と農学が一つになった、移住のための総合科学です。', en:'Develops ways to make building materials and oxygen from Martian soil — aerospace, chemistry and agriculture fused into one science of settlement.'},
-   tags:{ja:['宇宙工学','資源化学','工学部'], en:['Aerospace','Resource Chemistry','Engineering']},
-   sources:[{label:'OpenAlex', url:'https://openalex.org'},{label:'ORCID', url:'https://orcid.org'}], checked:'2026-06-09'}
-];
-
-let professors = demoProfessors;
-let liveData = false;
-
-/* ---- 本番データ読込: data/site_data.json があれば自動で本番モード ---- */
-async function loadLive(){
-  try{
-    const r = await fetch('data/site_data.json');
-    if(!r.ok) return;
-    const d = await r.json();
-    if(Array.isArray(d) && d.length){
-      professors = d; liveData = true;
-      renderStatic(); render(); appendLoadMoreButtons();
-    }
-  }catch(e){ /* ファイルなし → デモのまま */ }
+async function getJSON(url){
+  const r=await fetch(url+(url.includes("?")?"&":"?")+"mailto="+encodeURIComponent(MAILTO));
+  if(!r.ok) throw new Error("HTTP "+r.status); return r.json();
+}
+async function loadData(){
+  try{ QDATA=await (await fetch("./data/questions.json")).json(); }catch(e){ QDATA=SAMPLE_QUESTIONS; }
+  try{ SITE=await (await fetch("./data/site_data.json")).json(); }catch(e){ SITE=SAMPLE_SITE; }
 }
 
-/* ---- ticker ---- */
-let tickerIdx = 0;
-function tick(){
-  const qs = ui[lang].chipsLabel;
-  const el = document.getElementById('tickerText');
-  const q = qs[tickerIdx % qs.length];
-  el.innerHTML = '「' + q.replace(/[??]$/, '') + '<span class="qmark">?</span>」';
-  el.style.animation = 'none'; void el.offsetWidth; el.style.animation = '';
-  tickerIdx++;
+function applyLang(){
+  document.body.dataset.lang=lang; document.documentElement.lang=lang;
+  for(const el of document.querySelectorAll("[data-i]")) el.textContent=T[lang][el.dataset.i];
+  document.getElementById("q").placeholder=T[lang].hint.replace(/^(例:|e\.g\. )/,"");
+  document.getElementById("kq").placeholder=T[lang].khint;
+  document.querySelectorAll(".lang button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.set===lang));
+  renderTree();
 }
-setInterval(tick, 3400);
+document.querySelectorAll(".lang button").forEach(b=>b.onclick=()=>{lang=b.dataset.set;applyLang();});
 
-/* ---- rendering ---- */
-function setLang(l){
-  lang = l;
-  document.getElementById('btnJa').classList.toggle('active', l==='ja');
-  document.getElementById('btnEn').classList.toggle('active', l==='en');
-  document.documentElement.lang = l;
-  renderStatic(); render(); tick();
-}
-
-function renderStatic(){
-  const t = ui[lang];
-  document.getElementById('demoBanner').innerHTML = liveData ? t.liveBanner(professors.length) : t.banner;
-  document.getElementById('eyebrow').textContent = t.eyebrow;
-  document.getElementById('heroTitle').innerHTML = t.title;
-  document.getElementById('heroLede').textContent = t.lede;
-  document.getElementById('searchBox').placeholder = t.searchPlaceholder;
-  document.getElementById('howtoTitle').innerHTML = t.howtoTitle;
-  document.getElementById('howtoSub').textContent = t.howtoSub;
-  document.getElementById('footerText').textContent = t.footer;
-
-  document.getElementById('questionChips').innerHTML = t.chipsLabel.map(q =>
-    `<button class="chip" onclick="useQuestion(this)">${q}</button>`).join('');
-
-  document.getElementById('steps').innerHTML = t.steps.map(s =>
-    `<div class="step"><div class="step-tag">${s.tag}</div><h3>${s.h}</h3><p>${s.p}</p></div>`).join('');
-
-  const f = t.fields;
-  document.getElementById('fieldFilters').innerHTML =
-    `<span class="label">${t.fieldLabel}</span>` + Object.keys(f).map(k =>
-    `<button class="chip ${activeField===k?'active':''}" onclick="setField('${k}')">${f[k]}</button>`).join('');
-
-  const r = t.regions;
-  document.getElementById('regionFilters').innerHTML =
-    `<span class="label">${t.regionLabel}</span>` + Object.keys(r).map(k =>
-    `<button class="chip ${activeRegion===k?'active':''}" onclick="setRegion('${k}')">${r[k]}</button>`).join('');
-}
-
-function useQuestion(btn){
-  document.getElementById('searchBox').value = btn.textContent;
-  render();
-  document.getElementById('grid').scrollIntoView({behavior:'smooth', block:'start'});
-}
-function setField(k){ activeField = k; renderStatic(); render(); }
-function setRegion(k){ activeRegion = k; renderStatic(); render(); }
-
-/* かんたん検索:問い・要約・タグを横断、単純な部分一致+キーワード連想 */
-const synonyms = {
-  '眠': 'life', 'sleep': 'life', '脳': 'life', 'brain': 'life', '老': 'life',
-  'ai': 'ai', 'ゲーム': 'ai', 'game': 'ai', '友だち': 'ai', 'friend': 'ai',
-  '海': 'earth', 'ocean': 'earth', '気候': 'earth', 'climate': 'earth', '地震': 'earth',
-  'お金': 'society', 'money': 'society', '幸': 'society', 'happi': 'society', 'sns': 'society',
-  'ことば': 'humanities', '言': 'humanities', 'language': 'humanities', 'word': 'humanities', '物語': 'humanities', 'stor': 'humanities',
-  '宇宙': 'space', 'universe': 'space', '火星': 'space', 'mars': 'space', '光': 'space'
-};
-
-function render(){
-  const t = ui[lang];
-  const q = document.getElementById('searchBox').value.trim().toLowerCase();
-  let hintField = null;
-  for (const key in synonyms){ if (q && q.includes(key)) { hintField = synonyms[key]; break; } }
-
-  const hits = professors.filter(p => {
-    if (activeField !== 'all' && p.field !== activeField) return false;
-    if (activeRegion !== 'all' && p.region !== activeRegion) return false;
-    if (!q) return true;
-    const hay = [p.toi.ja, p.toi.en, p.sum.ja, p.sum.en, p.aff.ja, p.aff.en,
-                 ...p.tags.ja, ...p.tags.en].join(' ').toLowerCase();
-    return hay.includes(q) || p.field === hintField;
+/* ---- tabs ---- */
+function tab(which){
+  ["k","q","s"].forEach(w=>{
+    document.getElementById("t-"+w).setAttribute("aria-selected",which===w);
+    document.getElementById("p-"+w).classList.toggle("on",which===w);
   });
+}
+document.getElementById("t-k").onclick=()=>tab("k");
+document.getElementById("t-q").onclick=()=>tab("q");
+document.getElementById("t-s").onclick=()=>tab("s");
 
-  document.getElementById('resultCount').textContent = t.results(hits.length);
+/* ---- question tree ---- */
+function renderTree(){
+  const root=document.getElementById("qtree"); root.innerHTML="";
+  document.getElementById("qresults").innerHTML="";
+  (QDATA.clusters||[]).forEach(c=>{
+    const d=document.createElement("details"); d.className="cluster";
+    const s=document.createElement("summary");
+    s.innerHTML=`<span class="ic">${c.icon||"✦"}</span><span>${c.label[lang]}</span>
+      <span class="cap">${c.questions.length} ${lang==="ja"?"の問い":"questions"}</span>`;
+    d.appendChild(s);
+    const list=document.createElement("div"); list.className="qlist";
+    c.questions.forEach(q=>{
+      const b=document.createElement("button"); b.className="q"; b.textContent=q.q[lang];
+      b.onclick=()=>answerQuestion(q);
+      list.appendChild(b);
+    });
+    d.appendChild(list); root.appendChild(d);
+  });
+}
 
-  const grid = document.getElementById('grid');
-  if (!hits.length){
-    grid.innerHTML = `<div class="empty"><div class="big">${t.emptyBig}</div><div>${t.emptyText}</div></div>`;
-    return;
+let qShown=0, qMatched=[];
+function answerQuestion(q){
+  const want=new Set(q.fields||[]);
+  qMatched=(Array.isArray(SITE)?SITE:((SITE&&SITE.researchers)||[]))
+    .filter(r=>(r.fields||[]).some(f=>want.has(f)))
+    .sort((a,b)=>(b.cited||0)-(a.cited||0));
+  qShown=0;
+  const out=document.getElementById("qresults");
+  out.innerHTML="";
+  const crumb=document.createElement("div"); crumb.className="crumb";
+  const back=document.createElement("button"); back.className="back"; back.textContent=T[lang].back;
+  back.onclick=()=>{out.innerHTML="";window.scrollTo({top:0,behavior:"smooth"});};
+  crumb.appendChild(back); out.appendChild(crumb);
+  const head=document.createElement("div"); head.className="head";
+  head.innerHTML=`<h2>${q.q[lang]}</h2><span class="count">${qMatched.length} ${T[lang].inthis}</span>`;
+  out.appendChild(head);
+  const note=document.createElement("p"); note.className="note"; note.textContent=T[lang].qnote;
+  out.appendChild(note);
+  out.appendChild(document.createElement("div")).id="qcards";
+  moreQ();
+  window.scrollTo({top:out.offsetTop-20,behavior:"smooth"});
+}
+function moreQ(){
+  const box=document.getElementById("qcards");
+  const old=document.getElementById("qmore"); if(old) old.remove();
+  qMatched.slice(qShown,qShown+10).forEach(r=>box.appendChild(card(r,true)));
+  qShown+=10;
+  if(qShown<qMatched.length){
+    const b=document.createElement("button"); b.id="qmore"; b.className="more"; b.textContent=T[lang].more;
+    b.onclick=moreQ; document.getElementById("qresults").appendChild(b);
   }
-  grid.innerHTML = hits.map(p => `
-    <article class="card">
-      <div class="toi">${p.toi[lang]}</div>
-      ${p.archived ? `<div class="archive-badge" title="${t.archiveNote}">⏸ ${t.archiveTag}</div>` : ''}
-      <div class="who"><b>${p.name[lang]}</b><br>${p.aff[lang]}${p.moved_to ? `<br><span class="moved">${t.movedTo(p.moved_to.name_en)}</span>` : ''}</div>
-      <div class="summary">${p.sum[lang]}</div>
-      <div class="tags">${p.tags[lang].map(tg => `<span class="tag">${tg}</span>`).join('')}</div>
-      <div class="sources">
-        <div class="src-label">${t.srcLabel}</div>
-        ${p.sources.map(s => `<a href="${s.url}" target="_blank" rel="noopener">${s.label}</a>`).join(' · ')}
-        <span class="checked">${t.checked(p.checked)}</span>
+}
+
+/* ---- card (works for both site_data and live OpenAlex shapes) ---- */
+function card(r,fromSite){
+  const c=document.createElement("div"); c.className="card";
+  const oid=r.id.replace("https://openalex.org/","");
+  const name=r.name, inst=r.inst||r.inst_name||"", cc=r.country;
+  const works=r.works??r.works_count??0, cited=r.cited??r.cited_by_count??0, h=r.h??r.h_index??"–";
+  const topics=(r.topics||[]).slice(0,4).map(t=>`<span class="chip">${typeof t==="string"?t:t.display_name}</span>`).join("");
+  const orcid=r.orcid?`<a href="${r.orcid}" target="_blank" rel="noopener">ORCID ↗</a>`:"";
+  c.innerHTML=`
+    <div class="top">
+      <div><h3 class="name"><a href="https://openalex.org/${oid}" target="_blank" rel="noopener">${name}</a></h3>
+        <div class="aff">${flag(cc)} ${inst}</div></div>
+      <div class="stats">
+        <span><b>${works.toLocaleString()}</b>${T[lang].works}</span>
+        <span><b>${cited.toLocaleString()}</b>${T[lang].cited}</span>
+        <span><b>${h}</b>${T[lang].h}</span>
       </div>
-    </article>`).join('');
-}
-
-
-/* ===================================================
-   「もっと見る」— OpenAlexからブラウザ直接取得
-   AI要約なし・サーバーなし・完全無料
-=================================================== */
-
-// 取得済みOpenAlex機関ID → 取得済みページ数のキャッシュ
-const loadedPages = {};
-// 表示中の生データ研究者
-let liveResearchers = {};  // univKey → [{...}]
-
-// render()のあとに大学ごとの「もっと見る」ボタンを生成
-function renderLiveSection(){
-  const t = ui[lang];
-  const section = document.getElementById('liveSection');
-  section.innerHTML = '';
-
-  // 現在の検索・フィルター結果から大学リストを抽出
-  const q = document.getElementById('searchBox').value.trim().toLowerCase();
-  const univsInView = new Map();
-  professors.forEach(p => {
-    if(activeField !== 'all' && p.field !== activeField) return;
-    if(activeRegion !== 'all' && p.region !== activeRegion) return;
-    const key = p.aff ? (p.aff.en || p.aff.ja) : '';
-    if(!key) return;
-    if(!univsInView.has(key)) univsInView.set(key, {
-      name_ja: p.aff.ja || key,
-      name_en: p.aff.en || key,
-      openalex_id: p.openalex_institution_id || null,
-      count: 0
-    });
-    univsInView.get(key).count++;
-  });
-
-  // 大学別セクションを生成(5件以上ヒットした大学のみ「もっと見る」を出す)
-  univsInView.forEach((univ, key) => {
-    const wrap = document.createElement('div');
-    wrap.className = 'univ-section';
-    wrap.id = 'usec-' + btoa(encodeURIComponent(key)).replace(/[^a-z0-9]/gi,'').slice(0,20);
-
-    const existing = (liveResearchers[key] || []).length;
-    if(existing === 0) return;  // まだ取得していない = ボタンだけ後で追加
-
-    const grid = document.createElement('div');
-    grid.className = 'live-grid';
-    (liveResearchers[key] || []).forEach(r => {
-      grid.insertAdjacentHTML('beforeend', rawCard(r, t));
-    });
-    wrap.appendChild(grid);
-    section.appendChild(wrap);
-  });
-}
-
-function rawCard(r, t){
-  const topics = (r.topics || []).slice(0,4).join(' · ') || '—';
-  const oaUrl = `https://openalex.org/${r.id || ''}`;
-  return `<article class="raw-card">
-    <div class="rc-name">${r.display_name || '—'}</div>
-    <div class="rc-topics">${t.rawTopics}: ${topics}</div>
-    <div class="rc-note">${lang==='ja'?'AI要約はまだありません — 数日後に自動生成されます':'No AI summary yet — will be generated automatically in a few days'}</div>
-    <div class="rc-src">
-      <a href="${oaUrl}" target="_blank" rel="noopener">OpenAlex</a>
-      ${r.orcid ? ` · <a href="${r.orcid}" target="_blank" rel="noopener">ORCID</a>` : ''}
-      <span class="checked">&nbsp;— ${lang==='ja'?'今日取得':'fetched today'}</span>
     </div>
-  </article>`;
+    <div class="topics">${topics}</div>
+    <div class="links"><a href="https://openalex.org/${oid}" target="_blank" rel="noopener">${T[lang].profile} ↗</a>${orcid}</div>`;
+  return c;
 }
 
-// 大学名→OpenAlex機関IDを検索して取得
-async function fetchInstId(univName){
-  const url = `https://api.openalex.org/institutions?search=${encodeURIComponent(univName)}&filter=country_code:JP&per_page=1`;
+/* ---- school search (on-demand OpenAlex) ---- */
+const $st=document.getElementById("status"),$pick=document.getElementById("pick"),$sr=document.getElementById("sresults");
+function setStatus(m,err){ if(!m){$st.hidden=true;return;} $st.hidden=false; $st.textContent=m; $st.className="status"+(err?" err":""); }
+async function searchSchool(query){
+  $pick.innerHTML=""; $sr.innerHTML=""; setStatus(T[lang].searching);
   try{
-    const d = await fetch(url).then(r=>r.json());
-    return d.results?.[0]?.id?.split('/').pop() || null;
-  }catch(e){ return null; }
+    const d=await getJSON(`${API}/institutions?search=${encodeURIComponent(query)}&per_page=5&select=id,display_name,country_code,type,works_count`);
+    setStatus(null); const list=d.results||[];
+    if(!list.length){ setStatus(T[lang].none,true); return; }
+    if(list.length===1){ loadSchool(list[0]); return; }
+    list.forEach(inst=>{
+      const b=document.createElement("button"); b.className="inst";
+      b.innerHTML=`<span class="flag">${flag(inst.country_code)}</span><span><span class="nm">${inst.display_name}</span><br>
+        <span class="meta">${(inst.type||"").toUpperCase()} · ${(inst.works_count||0).toLocaleString()} works</span></span>`;
+      b.onclick=()=>{ $pick.innerHTML=""; loadSchool(inst); };
+      $pick.appendChild(b);
+    });
+  }catch(e){ setStatus(T[lang].err,true); }
 }
-
-// 機関IDから研究者を25人取得
-async function fetchResearchers(instId, page=1){
-  const url = `https://api.openalex.org/authors?filter=last_known_institutions.id:${instId},works_count:>10&sort=cited_by_count:desc&per_page=25&page=${page}`;
+let scursor="*",scur=null,stotal=0,sloaded=0;
+async function loadSchool(inst,append){
+  if(!append){ scur=inst; scursor="*"; sloaded=0; $sr.innerHTML=""; }
+  setStatus(T[lang].loading);
   try{
-    const d = await fetch(url).then(r=>r.json());
-    return d.results || [];
-  }catch(e){ return []; }
-}
-
-// 「もっと見る」ボタンがクリックされたとき
-async function loadMoreResearchers(btn, univKey, univNameEn){
-  const t = ui[lang];
-  btn.disabled = true;
-  btn.classList.add('loading');
-
-  let instId = loadedPages[univKey]?.instId;
-  if(!instId){
-    instId = await fetchInstId(univNameEn);
-    if(!instId){
-      btn.textContent = t.noMore;
-      btn.disabled = true;
-      return;
+    const id=inst.id.split("/").pop();
+    const d=await getJSON(`${API}/authors?filter=last_known_institutions.id:${id}&sort=cited_by_count:desc&per_page=10&cursor=${encodeURIComponent(scursor)}&select=id,display_name,orcid,works_count,cited_by_count,summary_stats,topics`);
+    setStatus(null); scursor=d.meta?.next_cursor||null; stotal=d.meta?.count||0;
+    const ppl=(d.results||[]).map(a=>({id:a.id,name:a.display_name,inst:inst.display_name,country:inst.country_code,
+      works:a.works_count,cited:a.cited_by_count,h:a.summary_stats?.h_index,topics:(a.topics||[]).map(t=>t.display_name),orcid:a.orcid}));
+    if(!append && !ppl.length){ setStatus(T[lang].nores,true); return; }
+    if(!append){
+      const head=document.createElement("div"); head.className="head";
+      head.innerHTML=`<span class="flag">${flag(inst.country_code)}</span><h2>${inst.display_name}</h2>
+        <span class="count">${stotal.toLocaleString()} ${T[lang].inthis}</span>`;
+      $sr.appendChild(head);
     }
-    loadedPages[univKey] = { instId, page: 0 };
-  }
-
-  const nextPage = (loadedPages[univKey].page || 0) + 1;
-  const results = await fetchResearchers(instId, nextPage);
-
-  if(!results.length){
-    btn.classList.remove('loading');
-    btn.textContent = t.noMore;
-    btn.disabled = true;
-    return;
-  }
-
-  loadedPages[univKey].page = nextPage;
-  if(!liveResearchers[univKey]) liveResearchers[univKey] = [];
-  liveResearchers[univKey].push(...results);
-
-  // セクションをレンダリング
-  const sectionId = 'usec-' + btoa(encodeURIComponent(univKey)).replace(/[^a-z0-9]/gi,'').slice(0,20);
-  let section = document.getElementById(sectionId);
-  if(!section){
-    section = document.createElement('div');
-    section.className = 'univ-section';
-    section.id = sectionId;
-    const header = document.createElement('div');
-    header.className = 'univ-section-header';
-    header.innerHTML = `<h2>${lang==='ja'?univKey:univNameEn} — ${lang==='ja'?'OpenAlex生データ':'OpenAlex live data'}</h2>`;
-    section.appendChild(header);
-    const grid = document.createElement('div');
-    grid.className = 'live-grid';
-    grid.id = sectionId + '-grid';
-    section.appendChild(grid);
-    btn.closest('.load-more-wrap')?.before(section);
-  }
-
-  const grid = document.getElementById(sectionId + '-grid') || section.querySelector('.live-grid');
-  results.forEach(r => grid.insertAdjacentHTML('beforeend', rawCard(r, t)));
-
-  btn.classList.remove('loading');
-  btn.disabled = false;
-  btn.querySelector('.btn-text').textContent =
-    `▼ ${lang==='ja'?'さらに読み込む':'Load more'} (${liveResearchers[univKey].length}${lang==='ja'?'人取得済み':' loaded'})`;
+    ppl.forEach(r=>$sr.appendChild(card(r)));
+    sloaded+=ppl.length; renderSMore();
+  }catch(e){ setStatus(T[lang].err,true); }
 }
-
-// render()のあとに各大学の「もっと見る」ボタンを差し込む
-function appendLoadMoreButtons(){
-  const t = ui[lang];
-  // 現在表示中のカードから大学を収集
-  const cards = document.querySelectorAll('#grid .card, #grid article');
-  const seen = new Set();
-  const univs = [];
-  professors.filter(p => {
-    if(activeField !== 'all' && p.field !== activeField) return false;
-    if(activeRegion !== 'all' && p.region !== activeRegion) return false;
-    return true;
-  }).forEach(p => {
-    const key = (p.aff?.en || p.aff?.ja || '');
-    if(key && !seen.has(key)){
-      seen.add(key);
-      univs.push({ key, name_en: p.aff?.en || key, name_ja: p.aff?.ja || key });
-    }
-  });
-
-  // 既存ボタンを削除
-  document.querySelectorAll('.load-more-wrap').forEach(el => el.remove());
-
-  // グリッドの後に大学ごとのボタンを追加
-  const grid = document.getElementById('grid');
-  univs.forEach(u => {
-    const wrap = document.createElement('div');
-    wrap.className = 'load-more-wrap';
-    wrap.style.cssText = 'max-width:1080px;margin:0 auto;padding:0 20px 8px;';
-    wrap.innerHTML = `
-      <button class="load-more-btn" onclick="loadMoreResearchers(this,'${u.key.replace(/'/g,"\'")}','${u.name_en.replace(/'/g,"\'")}')">
-        <span class="spinner"></span>
-        <span class="btn-text">+ ${lang==='ja'?u.name_ja:u.name_en} の研究者をもっと見る (OpenAlex)</span>
-      </button>`;
-    grid.after(wrap);
-  });
+let $smore=null;
+function renderSMore(){
+  if($smore) $smore.remove();
+  if(!scursor||sloaded>=stotal) return;
+  $smore=document.createElement("button"); $smore.className="more"; $smore.textContent=T[lang].more;
+  $smore.onclick=async()=>{ $smore.disabled=true; $smore.innerHTML=`<span class="spin"></span>${T[lang].more}`; await loadSchool(scur,true); };
+  $sr.appendChild($smore);
 }
+document.getElementById("go").onclick=()=>{const q=document.getElementById("q").value.trim();if(q)searchSchool(q);};
+document.getElementById("q").addEventListener("keydown",e=>{if(e.key==="Enter"){const q=e.target.value.trim();if(q)searchSchool(q);}});
 
-document.getElementById('searchBox').addEventListener('input', () => { render(); appendLoadMoreButtons(); });
+/* ---- keyword → topic match (client-side, no live API, no key) ---- */
+const SYN={
+  "宇宙":["cosmolog","astrophys","astronom","univers","galax"],"うちゅう":["cosmolog","astrophys","astronom"],
+  "ブラックホール":["black hole"],"星":["star","stellar"],"惑星":["planet"],
+  "量子":["quantum"],"物理":["physic"],"数学":["mathemat"],"統計":["statistic"],
+  "ai":["artificial intelligence","machine learning","neural","deep learning"],
+  "人工知能":["artificial intelligence","machine learning","neural"],"機械学習":["machine learning","neural"],
+  "ロボット":["robot"],"プログラ":["software","programming","computation"],"情報":["information","comput"],
+  "コンピュータ":["comput"],"暗号":["cryptograph"],"データ":["data"],
+  "脳":["brain","neuro"],"神経":["neuro"],"心理":["psycholog"],"記憶":["memory"],"意識":["consciousness","cognit"],
+  "遺伝":["gene","genetic","genom"],"遺伝子":["gene","genetic","genom"],"細胞":["cell"],"再生医療":["regenerat"],
+  "がん":["cancer","oncolog","tumor"],"癌":["cancer","oncolog","tumor"],"ウイルス":["virus","viral"],"免疫":["immun"],
+  "感染":["infect"],"薬":["pharmac","drug"],"医療":["medic","clinical"],"医学":["medic","clinical"],
+  "老化":["aging","ageing","senescen"],"健康":["health"],"栄養":["nutrition"],
+  "気候":["climate"],"気候変動":["climate"],"環境":["environment","ecolog"],"地震":["earthquake","seismic"],
+  "火山":["volcan"],"海":["ocean","marine"],"海洋":["ocean","marine"],"生態":["ecolog","biodivers"],
+  "エネルギー":["energy"],"電池":["batter"],"材料":["material"],"半導体":["semiconductor"],"化学":["chemist"],
+  "食":["food","agricultur"],"食料":["food security","agricultur"],"農業":["agricultur"],"植物":["plant","botan"],
+  "動物":["animal","zoolog","veterinar"],"昆虫":["insect","entomol"],
+  "経済":["econom"],"金融":["financ","econom"],"お金":["financ","monetary","econom"],"経営":["management","business"],
+  "社会":["social","sociolog"],"政治":["politic"],"法":["law","legal"],"教育":["education"],
+  "言語":["linguist","language"],"言葉":["linguist","language"],"歴史":["histor"],"哲学":["philosoph"],
+  "芸術":["art","aesthetic"],"美術":["art","aesthetic"],"音楽":["music"],"建築":["architect"],
+  "都市":["urban","city","cities"],"地理":["geograph"],"文学":["literature"]
+};
+function kwTerms(query){
+  const q=query.toLowerCase().trim();
+  const terms=new Set();
+  if(/[a-z]/.test(q)) terms.add(q);
+  for(const key in SYN){ if(q.includes(key)) SYN[key].forEach(t=>terms.add(t)); }
+  return [...terms];
+}
+function kwAll(){ return Array.isArray(SITE)?SITE:((SITE&&SITE.researchers)||[]); }
+let kShown=0, kMatched=[];
+function kwNote(msg){ const out=document.getElementById("kresults"); out.innerHTML="";
+  const p=document.createElement("p"); p.className="status err"; p.textContent=msg; out.appendChild(p); }
+function kwSearch(query){
+  const terms=kwTerms(query);
+  const out=document.getElementById("kresults"); out.innerHTML="";
+  if(!terms.length){ kwNote(T[lang].knone); return; }
+  kMatched=kwAll().map(r=>{
+    const tops=(r.topics||[]).map(t=>(typeof t==="string"?t:(t.display_name||"")).toLowerCase());
+    let score=0; terms.forEach(term=>{ if(tops.some(tp=>tp.includes(term))) score++; });
+    return {r,score};
+  }).filter(x=>x.score>0)
+    .sort((a,b)=> b.score-a.score || (b.r.cited||b.r.cited_by_count||0)-(a.r.cited||a.r.cited_by_count||0))
+    .map(x=>x.r);
+  if(!kMatched.length){ kwNote(T[lang].knone); return; }
+  const head=document.createElement("div"); head.className="head";
+  head.innerHTML=`<h2>“${query}”</h2><span class="count">${kMatched.length.toLocaleString()} ${T[lang].kcount}</span>`;
+  out.appendChild(head);
+  const note=document.createElement("p"); note.className="note"; note.textContent=T[lang].qnote;
+  out.appendChild(note);
+  out.appendChild(document.createElement("div")).id="kcards";
+  kShown=0; moreK();
+}
+function moreK(){
+  const box=document.getElementById("kcards");
+  const old=document.getElementById("kmore"); if(old) old.remove();
+  kMatched.slice(kShown,kShown+10).forEach(r=>box.appendChild(card(r,true)));
+  kShown+=10;
+  if(kShown<kMatched.length){
+    const b=document.createElement("button"); b.id="kmore"; b.className="more"; b.textContent=T[lang].more;
+    b.onclick=moreK; document.getElementById("kresults").appendChild(b);
+  }
+}
+document.getElementById("kgo").onclick=()=>{const q=document.getElementById("kq").value.trim();if(q)kwSearch(q);};
+document.getElementById("kq").addEventListener("keydown",e=>{if(e.key==="Enter"){const q=e.target.value.trim();if(q)kwSearch(q);}});
 
-renderStatic(); render(); appendLoadMoreButtons(); tick(); loadLive();
+/* ---- boot ---- */
+loadData().then(applyLang);
 </script>
-
 </body>
 </html>
