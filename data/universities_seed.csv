@@ -1,0 +1,260 @@
+name_ja,name_en,type,prefecture,reason,org_kind
+北海道大学,Hokkaido University,national,北海道,,university
+北海道教育大学,Hokkaido University of Education,national,北海道,,university
+室蘭工業大学,Muroran Institute of Technology,national,北海道,,university
+小樽商科大学,Otaru University of Commerce,national,北海道,,university
+帯広畜産大学,Obihiro University of Agriculture and Veterinary Medicine,national,北海道,,university
+旭川医科大学,Asahikawa Medical University,national,北海道,,university
+北見工業大学,Kitami Institute of Technology,national,北海道,,university
+弘前大学,Hirosaki University,national,青森県,,university
+岩手大学,Iwate University,national,岩手県,,university
+東北大学,Tohoku University,national,宮城県,,university
+宮城教育大学,Miyagi University of Education,national,宮城県,,university
+秋田大学,Akita University,national,秋田県,,university
+山形大学,Yamagata University,national,山形県,,university
+福島大学,Fukushima University,national,福島県,,university
+茨城大学,Ibaraki University,national,茨城県,,university
+筑波大学,University of Tsukuba,national,茨城県,,university
+筑波技術大学,Tsukuba University of Technology,national,茨城県,,university
+宇都宮大学,Utsunomiya University,national,栃木県,,university
+群馬大学,Gunma University,national,群馬県,,university
+埼玉大学,Saitama University,national,埼玉県,,university
+千葉大学,Chiba University,national,千葉県,,university
+東京大学,The University of Tokyo,national,東京都,,university
+東京外国語大学,Tokyo University of Foreign Studies,national,東京都,,university
+東京学芸大学,Tokyo Gakugei University,national,東京都,,university
+東京農工大学,Tokyo University of Agriculture and Technology,national,東京都,,university
+東京藝術大学,Tokyo University of the Arts,national,東京都,,university
+東京科学大学,Institute of Science Tokyo,national,東京都,,university
+東京海洋大学,Tokyo University of Marine Science and Technology,national,東京都,,university
+お茶の水女子大学,Ochanomizu University,national,東京都,,university
+電気通信大学,The University of Electro-Communications,national,東京都,,university
+一橋大学,Hitotsubashi University,national,東京都,,university
+横浜国立大学,Yokohama National University,national,神奈川県,,university
+新潟大学,Niigata University,national,新潟県,,university
+長岡技術科学大学,Nagaoka University of Technology,national,新潟県,,university
+上越教育大学,Joetsu University of Education,national,新潟県,,university
+富山大学,University of Toyama,national,富山県,,university
+金沢大学,Kanazawa University,national,石川県,,university
+北陸先端科学技術大学院大学,Japan Advanced Institute of Science and Technology,national,石川県,,university
+福井大学,University of Fukui,national,福井県,,university
+山梨大学,University of Yamanashi,national,山梨県,,university
+信州大学,Shinshu University,national,長野県,,university
+岐阜大学,Gifu University,national,岐阜県,,university
+静岡大学,Shizuoka University,national,静岡県,,university
+浜松医科大学,Hamamatsu University School of Medicine,national,静岡県,,university
+名古屋大学,Nagoya University,national,愛知県,,university
+愛知教育大学,Aichi University of Education,national,愛知県,,university
+名古屋工業大学,Nagoya Institute of Technology,national,愛知県,,university
+豊橋技術科学大学,Toyohashi University of Technology,national,愛知県,,university
+三重大学,Mie University,national,三重県,,university
+滋賀大学,Shiga University,national,滋賀県,,university
+滋賀医科大学,Shiga University of Medical Science,national,滋賀県,,university
+京都大学,Kyoto University,national,京都府,,university
+京都教育大学,Kyoto University of Education,national,京都府,,university
+京都工芸繊維大学,Kyoto Institute of Technology,national,京都府,,university
+大阪大学,Osaka University,national,大阪府,,university
+大阪教育大学,Osaka Kyoiku University,national,大阪府,,university
+兵庫教育大学,Hyogo University of Teacher Education,national,兵庫県,,university
+神戸大学,Kobe University,national,兵庫県,,university
+奈良教育大学,Nara University of Education,national,奈良県,,university
+奈良女子大学,Nara Women's University,national,奈良県,,university
+奈良先端科学技術大学院大学,Nara Institute of Science and Technology,national,奈良県,,university
+和歌山大学,Wakayama University,national,和歌山県,,university
+鳥取大学,Tottori University,national,鳥取県,,university
+島根大学,Shimane University,national,島根県,,university
+岡山大学,Okayama University,national,岡山県,,university
+広島大学,Hiroshima University,national,広島県,,university
+山口大学,Yamaguchi University,national,山口県,,university
+徳島大学,Tokushima University,national,徳島県,,university
+鳴門教育大学,Naruto University of Education,national,徳島県,,university
+香川大学,Kagawa University,national,香川県,,university
+愛媛大学,Ehime University,national,愛媛県,,university
+高知大学,Kochi University,national,高知県,,university
+福岡教育大学,University of Teacher Education Fukuoka,national,福岡県,,university
+九州大学,Kyushu University,national,福岡県,,university
+九州工業大学,Kyushu Institute of Technology,national,福岡県,,university
+佐賀大学,Saga University,national,佐賀県,,university
+長崎大学,Nagasaki University,national,長崎県,,university
+熊本大学,Kumamoto University,national,熊本県,,university
+大分大学,Oita University,national,大分県,,university
+宮崎大学,University of Miyazaki,national,宮崎県,,university
+鹿児島大学,Kagoshima University,national,鹿児島県,,university
+鹿屋体育大学,National Institute of Fitness and Sports in Kanoya,national,鹿児島県,,university
+琉球大学,University of the Ryukyus,national,沖縄県,,university
+政策研究大学院大学,National Graduate Institute for Policy Studies,national,東京都,,university
+総合研究大学院大学,The Graduate University for Advanced Studies SOKENDAI,national,神奈川県,,university
+札幌医科大学,Sapporo Medical University,public,北海道,,university
+札幌市立大学,Sapporo City University,public,北海道,,university
+公立はこだて未来大学,Future University Hakodate,public,北海道,,university
+釧路公立大学,Kushiro Public University of Economics,public,北海道,,university
+名寄市立大学,Nayoro City University,public,北海道,,university
+公立千歳科学技術大学,Chitose Institute of Science and Technology,public,北海道,,university
+旭川市立大学,Asahikawa City University,public,北海道,,university
+青森県立保健大学,Aomori University of Health and Welfare,public,青森県,,university
+青森公立大学,Aomori Public University,public,青森県,,university
+岩手県立大学,Iwate Prefectural University,public,岩手県,,university
+宮城大学,Miyagi University,public,宮城県,,university
+秋田県立大学,Akita Prefectural University,public,秋田県,,university
+国際教養大学,Akita International University,public,秋田県,,university
+秋田公立美術大学,Akita University of Art,public,秋田県,,university
+山形県立保健医療大学,Yamagata Prefectural University of Health Sciences,public,山形県,,university
+山形県立米沢栄養大学,Yamagata Prefectural Yonezawa University of Nutrition Sciences,public,山形県,,university
+会津大学,University of Aizu,public,福島県,,university
+福島県立医科大学,Fukushima Medical University,public,福島県,,university
+茨城県立医療大学,Ibaraki Prefectural University of Health Sciences,public,茨城県,,university
+群馬県立女子大学,Gunma Prefectural Women's University,public,群馬県,,university
+群馬県立県民健康科学大学,Gunma Prefectural College of Health Sciences,public,群馬県,,university
+高崎経済大学,Takasaki City University of Economics,public,群馬県,,university
+前橋工科大学,Maebashi Institute of Technology,public,群馬県,,university
+埼玉県立大学,Saitama Prefectural University,public,埼玉県,,university
+千葉県立保健医療大学,Chiba Prefectural University of Health Sciences,public,千葉県,,university
+東京都立大学,Tokyo Metropolitan University,public,東京都,,university
+東京都立産業技術大学院大学,Advanced Institute of Industrial Technology,public,東京都,,university
+神奈川県立保健福祉大学,Kanagawa University of Human Services,public,神奈川県,,university
+横浜市立大学,Yokohama City University,public,神奈川県,,university
+川崎市立看護大学,Kawasaki City University of Nursing,public,神奈川県,,university
+新潟県立大学,University of Niigata Prefecture,public,新潟県,,university
+新潟県立看護大学,Niigata College of Nursing,public,新潟県,,university
+長岡造形大学,Nagaoka Institute of Design,public,新潟県,,university
+三条市立大学,Sanjo City University,public,新潟県,,university
+富山県立大学,Toyama Prefectural University,public,富山県,,university
+石川県立大学,Ishikawa Prefectural University,public,石川県,,university
+石川県立看護大学,Ishikawa Prefectural Nursing University,public,石川県,,university
+金沢美術工芸大学,Kanazawa College of Art,public,石川県,,university
+公立小松大学,Komatsu University,public,石川県,,university
+福井県立大学,Fukui Prefectural University,public,福井県,,university
+敦賀市立看護大学,Tsuruga Nursing University,public,福井県,,university
+都留文科大学,Tsuru University,public,山梨県,,university
+山梨県立大学,Yamanashi Prefectural University,public,山梨県,,university
+長野大学,Nagano University,public,長野県,,university
+長野県立大学,The University of Nagano,public,長野県,,university
+長野県看護大学,Nagano College of Nursing,public,長野県,,university
+公立諏訪東京理科大学,Suwa University of Science,public,長野県,,university
+岐阜県立看護大学,Gifu College of Nursing,public,岐阜県,,university
+岐阜薬科大学,Gifu Pharmaceutical University,public,岐阜県,,university
+情報科学芸術大学院大学,Institute of Advanced Media Arts and Sciences,public,岐阜県,,university
+静岡県立大学,University of Shizuoka,public,静岡県,,university
+静岡文化芸術大学,Shizuoka University of Art and Culture,public,静岡県,,university
+静岡社会健康医学大学院大学,Graduate School of Public Health Shizuoka,public,静岡県,,university
+愛知県立大学,Aichi Prefectural University,public,愛知県,,university
+愛知県立芸術大学,Aichi University of the Arts,public,愛知県,,university
+名古屋市立大学,Nagoya City University,public,愛知県,,university
+三重県立看護大学,Mie Prefectural College of Nursing,public,三重県,,university
+滋賀県立大学,The University of Shiga Prefecture,public,滋賀県,,university
+京都府立大学,Kyoto Prefectural University,public,京都府,,university
+京都府立医科大学,Kyoto Prefectural University of Medicine,public,京都府,,university
+京都市立芸術大学,Kyoto City University of Arts,public,京都府,,university
+福知山公立大学,Fukuchiyama Public University,public,京都府,,university
+大阪公立大学,Osaka Metropolitan University,public,大阪府,,university
+兵庫県立大学,University of Hyogo,public,兵庫県,,university
+神戸市外国語大学,Kobe City University of Foreign Studies,public,兵庫県,,university
+神戸市看護大学,Kobe City College of Nursing,public,兵庫県,,university
+芸術文化観光専門職大学,Professional College of Arts and Tourism,public,兵庫県,,university
+奈良県立大学,Nara Prefectural University,public,奈良県,,university
+奈良県立医科大学,Nara Medical University,public,奈良県,,university
+和歌山県立医科大学,Wakayama Medical University,public,和歌山県,,university
+公立鳥取環境大学,Tottori University of Environmental Studies,public,鳥取県,,university
+島根県立大学,The University of Shimane,public,島根県,,university
+岡山県立大学,Okayama Prefectural University,public,岡山県,,university
+新見公立大学,Niimi University,public,岡山県,,university
+県立広島大学,Prefectural University of Hiroshima,public,広島県,,university
+広島市立大学,Hiroshima City University,public,広島県,,university
+叡啓大学,Eikei University of Hiroshima,public,広島県,,university
+尾道市立大学,Onomichi City University,public,広島県,,university
+福山市立大学,Fukuyama City University,public,広島県,,university
+山口県立大学,Yamaguchi Prefectural University,public,山口県,,university
+下関市立大学,Shimonoseki City University,public,山口県,,university
+山陽小野田市立山口東京理科大学,Sanyo-Onoda City University,public,山口県,,university
+周南公立大学,Shunan University,public,山口県,,university
+香川県立保健医療大学,Kagawa Prefectural University of Health Sciences,public,香川県,,university
+愛媛県立医療技術大学,Ehime Prefectural University of Health Sciences,public,愛媛県,,university
+高知県立大学,University of Kochi,public,高知県,,university
+高知工科大学,Kochi University of Technology,public,高知県,,university
+北九州市立大学,The University of Kitakyushu,public,福岡県,,university
+九州歯科大学,Kyushu Dental University,public,福岡県,,university
+福岡県立大学,Fukuoka Prefectural University,public,福岡県,,university
+福岡女子大学,Fukuoka Women's University,public,福岡県,,university
+長崎県立大学,University of Nagasaki,public,長崎県,,university
+熊本県立大学,Prefectural University of Kumamoto,public,熊本県,,university
+大分県立看護科学大学,Oita University of Nursing and Health Sciences,public,大分県,,university
+宮崎県立看護大学,Miyazaki Prefectural Nursing University,public,宮崎県,,university
+宮崎公立大学,Miyazaki Municipal University,public,宮崎県,,university
+沖縄県立看護大学,Okinawa Prefectural College of Nursing,public,沖縄県,,university
+沖縄県立芸術大学,Okinawa Prefectural University of Arts,public,沖縄県,,university
+名桜大学,Meio University,public,沖縄県,,university
+早稲田大学,Waseda University,private,東京都,A:科研費上位,university
+慶應義塾大学,Keio University,private,東京都,A:科研費上位,university
+東京理科大学,Tokyo University of Science,private,東京都,A:科研費上位,university
+日本大学,Nihon University,private,東京都,A:科研費上位,university
+立命館大学,Ritsumeikan University,private,京都府,A:科研費上位,university
+近畿大学,Kindai University,private,大阪府,A:科研費上位,university
+明治大学,Meiji University,private,東京都,A:科研費上位,university
+同志社大学,Doshisha University,private,京都府,A:科研費上位,university
+関西大学,Kansai University,private,大阪府,A:科研費上位,university
+法政大学,Hosei University,private,東京都,A:科研費上位,university
+中央大学,Chuo University,private,東京都,A:科研費上位,university
+関西学院大学,Kwansei Gakuin University,private,兵庫県,A:科研費上位,university
+上智大学,Sophia University,private,東京都,A:科研費上位,university
+青山学院大学,Aoyama Gakuin University,private,東京都,A:科研費上位,university
+立教大学,Rikkyo University,private,東京都,A:科研費上位,university
+学習院大学,Gakushuin University,private,東京都,A:科研費上位,university
+東海大学,Tokai University,private,神奈川県,A:科研費上位,university
+帝京大学,Teikyo University,private,東京都,A:科研費上位,university
+順天堂大学,Juntendo University,private,東京都,A:科研費上位,university
+昭和医科大学,Showa Medical University,private,東京都,A:科研費上位,university
+北里大学,Kitasato University,private,神奈川県,A:科研費上位,university
+東邦大学,Toho University,private,東京都,A:科研費上位,university
+日本医科大学,Nippon Medical School,private,東京都,A:科研費上位,university
+東京慈恵会医科大学,The Jikei University School of Medicine,private,東京都,A:科研費上位,university
+東京女子医科大学,Tokyo Women's Medical University,private,東京都,A:科研費上位,university
+自治医科大学,Jichi Medical University,private,栃木県,A:科研費上位,university
+産業医科大学,University of Occupational and Environmental Health Japan,private,福岡県,A:科研費上位,university
+藤田医科大学,Fujita Health University,private,愛知県,A:科研費上位,university
+兵庫医科大学,Hyogo Medical University,private,兵庫県,A:科研費上位,university
+大阪医科薬科大学,Osaka Medical and Pharmaceutical University,private,大阪府,A:科研費上位,university
+埼玉医科大学,Saitama Medical University,private,埼玉県,A:科研費上位,university
+獨協医科大学,Dokkyo Medical University,private,栃木県,A:科研費上位,university
+聖マリアンナ医科大学,St. Marianna University School of Medicine,private,神奈川県,A:科研費上位,university
+久留米大学,Kurume University,private,福岡県,A:科研費上位,university
+川崎医科大学,Kawasaki Medical School,private,岡山県,A:科研費上位,university
+岩手医科大学,Iwate Medical University,private,岩手県,A:科研費上位,university
+愛知医科大学,Aichi Medical University,private,愛知県,A:科研費上位,university
+金沢医科大学,Kanazawa Medical University,private,石川県,A:科研費上位,university
+名城大学,Meijo University,private,愛知県,A:科研費上位,university
+龍谷大学,Ryukoku University,private,京都府,A:科研費上位,university
+京都産業大学,Kyoto Sangyo University,private,京都府,A:科研費上位,university
+福岡大学,Fukuoka University,private,福岡県,A:科研費上位,university
+中京大学,Chukyo University,private,愛知県,A:科研費上位,university
+南山大学,Nanzan University,private,愛知県,A:科研費上位,university
+西南学院大学,Seinan Gakuin University,private,福岡県,A:科研費上位,university
+芝浦工業大学,Shibaura Institute of Technology,private,東京都,A:科研費上位,university
+東京都市大学,Tokyo City University,private,東京都,A:科研費上位,university
+工学院大学,Kogakuin University,private,東京都,A:科研費上位,university
+東京電機大学,Tokyo Denki University,private,東京都,A:科研費上位,university
+千葉工業大学,Chiba Institute of Technology,private,千葉県,A:科研費上位,university
+大阪工業大学,Osaka Institute of Technology,private,大阪府,A:科研費上位,university
+東京農業大学,Tokyo University of Agriculture,private,東京都,A:科研費上位,university
+京都薬科大学,Kyoto Pharmaceutical University,private,京都府,A:科研費上位,university
+東京薬科大学,Tokyo University of Pharmacy and Life Sciences,private,東京都,A:科研費上位,university
+国際基督教大学,International Christian University,private,東京都,B:リベラルアーツ,university
+津田塾大学,Tsuda University,private,東京都,B:女子高等教育・数学,university
+多摩美術大学,Tama Art University,private,東京都,B:美術,university
+武蔵野美術大学,Musashino Art University,private,東京都,B:美術,university
+日本体育大学,Nippon Sport Science University,private,東京都,B:体育科学,university
+酪農学園大学,Rakuno Gakuen University,private,北海道,B:獣医・酪農,university
+東北医科薬科大学,Tohoku Medical and Pharmaceutical University,private,宮城県,C:東北・医薬,university
+金沢工業大学,Kanazawa Institute of Technology,private,石川県,C:北陸・工学,university
+理化学研究所,RIKEN,national,埼玉県,D:大学外の師匠候補,institute
+産業技術総合研究所,National Institute of Advanced Industrial Science and Technology,national,茨城県,D:大学外の師匠候補,institute
+物質・材料研究機構,National Institute for Materials Science,national,茨城県,D:大学外の師匠候補,institute
+海洋研究開発機構,Japan Agency for Marine-Earth Science and Technology,national,神奈川県,D:大学外の師匠候補,institute
+宇宙航空研究開発機構,Japan Aerospace Exploration Agency,national,東京都,D:大学外の師匠候補,institute
+情報通信研究機構,National Institute of Information and Communications Technology,national,東京都,D:大学外の師匠候補,institute
+国立天文台,National Astronomical Observatory of Japan,national,東京都,D:大学外の師匠候補,institute
+高エネルギー加速器研究機構,High Energy Accelerator Research Organization,national,茨城県,D:大学外の師匠候補,institute
+国立がん研究センター,National Cancer Center Japan,national,東京都,D:大学外の師匠候補,institute
+国立環境研究所,National Institute for Environmental Studies,national,茨城県,D:大学外の師匠候補,institute
+国立情報学研究所,National Institute of Informatics,national,東京都,D:大学外の師匠候補,institute
+国立国語研究所,National Institute for Japanese Language and Linguistics,national,東京都,D:大学外の師匠候補,institute
+統計数理研究所,The Institute of Statistical Mathematics,national,東京都,D:大学外の師匠候補,institute

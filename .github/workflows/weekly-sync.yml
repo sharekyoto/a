@@ -1,0 +1,41 @@
+name: weekly-sync
+# 毎週月曜 03:00 JST に研究者データを同期し、変更分だけAI要約を再生成する。
+# GitHub Actions 無料枠(public repoは無制限)+ OpenAlex無料API で稼働。
+# 唯一の従量コストは Anthropic API(変更分のみ・--limit で上限管理)。
+
+on:
+  schedule:
+    - cron: "0 18 * * 0"   # 日曜18:00 UTC = 月曜03:00 JST
+  workflow_dispatch: {}     # 手動実行も可能
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Sync researchers from OpenAlex (diff detection)
+        env:
+          OPENALEX_MAILTO: ${{ secrets.OPENALEX_MAILTO }}
+        run: python scripts/sync_researchers.py --per-univ 25 --track-moves
+
+      - name: Summarize changed researchers only
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python scripts/summarize.py --limit 500   # 週あたりコスト上限
+
+      - name: Commit updated data
+        run: |
+          git config user.name "toi-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add data/ cache/
+          git diff --cached --quiet || git commit -m "weekly sync: $(date -u +%F)"
+          git push
+      # GitHub Pages を有効化していれば、push後に静的サイトが自動再公開される
