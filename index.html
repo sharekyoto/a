@@ -217,6 +217,55 @@ footer{
   text-align:center;font-family:var(--font-data);font-size:.72rem;
   color:var(--quiet);padding:26px 20px;
 }
+
+/* ===== もっと見る / OpenAlex live fetch ===== */
+.univ-section{
+  max-width:1080px;margin:0 auto 40px;padding:0 20px;
+}
+.univ-section-header{
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:2px solid var(--lapis);padding-bottom:10px;margin-bottom:16px;
+}
+.univ-section-header h2{
+  font-family:var(--font-display);font-weight:800;font-size:1rem;
+  color:var(--lapis-deep);
+}
+.univ-section-header .univ-count{
+  font-family:var(--font-data);font-size:.72rem;color:var(--quiet);
+}
+.load-more-btn{
+  display:flex;align-items:center;gap:8px;
+  background:none;border:1.5px solid var(--lapis);border-radius:999px;
+  padding:8px 20px;font-family:var(--font-body);font-size:.85rem;
+  color:var(--lapis);cursor:pointer;margin:20px auto;
+  transition:background .15s,color .15s;
+}
+.load-more-btn:hover{background:var(--lapis);color:#fff}
+.load-more-btn:disabled{opacity:.5;cursor:wait}
+.load-more-btn .spinner{
+  width:14px;height:14px;border:2px solid currentColor;
+  border-top-color:transparent;border-radius:50%;
+  animation:spin .7s linear infinite;display:none;
+}
+.load-more-btn.loading .spinner{display:block}
+.load-more-btn.loading .btn-text{display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.raw-card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:18px 20px 14px;display:flex;flex-direction:column;gap:8px;
+}
+.raw-card .rc-name{font-weight:700;font-size:.95rem}
+.raw-card .rc-topics{font-size:.82rem;color:var(--quiet)}
+.raw-card .rc-src{
+  margin-top:auto;padding-top:10px;border-top:1px dashed var(--line);
+  font-family:var(--font-data);font-size:.70rem;color:var(--quiet);
+}
+.raw-card .rc-src a{color:var(--lapis);text-decoration:none;border-bottom:1px solid var(--mist)}
+.raw-card .rc-note{font-size:.75rem;color:var(--quiet);font-style:italic}
+.live-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;
+}
+
 @media (max-width:480px){
   .hero{padding-top:40px}
   .grid{grid-template-columns:1fr}
@@ -254,6 +303,8 @@ footer{
 <div class="result-count" id="resultCount"></div>
 
 <main class="grid" id="grid"></main>
+
+<div id="liveSection"></div>
 
 <section class="howto">
   <div class="howto-inner">
@@ -295,6 +346,11 @@ const ui = {
     archiveTag: 'アーカイブ',
     archiveNote: 'この情報は最終確認日時点のものです',
     movedTo: n => `現在の所属 → ${n}`,
+    moreBtn: n => `この大学の研究者をもっと見る(OpenAlexから直接取得)`,
+    moreBtnLoading: 'OpenAlexから取得中...',
+    moreBtnDone: n => `さらに ${n} 人を取得 — AI要約なし・出典はOpenAlex`,
+    rawTopics: 'OpenAlexの研究トピック(AI要約前)',
+    noMore: 'これ以上の研究者データは見つかりませんでした',
     srcLabel: 'SOURCES(出典)',
     checked: d => `最終確認: ${d}(ソース更新時に自動再取得)`,
     howtoTitle: 'このサイトはどうやって<span class="q">自動で</span>進化し続けるの?',
@@ -325,6 +381,11 @@ const ui = {
     archiveTag: 'Archived',
     archiveNote: 'Information as of the last verified date',
     movedTo: n => `Now at → ${n}`,
+    moreBtn: n => `See more researchers from this university (live from OpenAlex)`,
+    moreBtnLoading: 'Fetching from OpenAlex...',
+    moreBtnDone: n => `${n} more researchers loaded — no AI summary yet · source: OpenAlex`,
+    rawTopics: 'Research topics from OpenAlex (pre-AI summary)',
+    noMore: 'No more researcher data found',
     srcLabel: 'SOURCES',
     checked: d => `Last verified: ${d} (auto-refreshed when sources change)`,
     howtoTitle: 'How does this site keep <span class="q">evolving on its own</span>?',
@@ -449,7 +510,7 @@ async function loadLive(){
     const d = await r.json();
     if(Array.isArray(d) && d.length){
       professors = d; liveData = true;
-      renderStatic(); render();
+      renderStatic(); render(); appendLoadMoreButtons();
     }
   }catch(e){ /* ファイルなし → デモのまま */ }
 }
@@ -558,9 +619,190 @@ function render(){
     </article>`).join('');
 }
 
-document.getElementById('searchBox').addEventListener('input', render);
 
-renderStatic(); render(); tick(); loadLive();
+/* ===================================================
+   「もっと見る」— OpenAlexからブラウザ直接取得
+   AI要約なし・サーバーなし・完全無料
+=================================================== */
+
+// 取得済みOpenAlex機関ID → 取得済みページ数のキャッシュ
+const loadedPages = {};
+// 表示中の生データ研究者
+let liveResearchers = {};  // univKey → [{...}]
+
+// render()のあとに大学ごとの「もっと見る」ボタンを生成
+function renderLiveSection(){
+  const t = ui[lang];
+  const section = document.getElementById('liveSection');
+  section.innerHTML = '';
+
+  // 現在の検索・フィルター結果から大学リストを抽出
+  const q = document.getElementById('searchBox').value.trim().toLowerCase();
+  const univsInView = new Map();
+  professors.forEach(p => {
+    if(activeField !== 'all' && p.field !== activeField) return;
+    if(activeRegion !== 'all' && p.region !== activeRegion) return;
+    const key = p.aff ? (p.aff.en || p.aff.ja) : '';
+    if(!key) return;
+    if(!univsInView.has(key)) univsInView.set(key, {
+      name_ja: p.aff.ja || key,
+      name_en: p.aff.en || key,
+      openalex_id: p.openalex_institution_id || null,
+      count: 0
+    });
+    univsInView.get(key).count++;
+  });
+
+  // 大学別セクションを生成(5件以上ヒットした大学のみ「もっと見る」を出す)
+  univsInView.forEach((univ, key) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'univ-section';
+    wrap.id = 'usec-' + btoa(encodeURIComponent(key)).replace(/[^a-z0-9]/gi,'').slice(0,20);
+
+    const existing = (liveResearchers[key] || []).length;
+    if(existing === 0) return;  // まだ取得していない = ボタンだけ後で追加
+
+    const grid = document.createElement('div');
+    grid.className = 'live-grid';
+    (liveResearchers[key] || []).forEach(r => {
+      grid.insertAdjacentHTML('beforeend', rawCard(r, t));
+    });
+    wrap.appendChild(grid);
+    section.appendChild(wrap);
+  });
+}
+
+function rawCard(r, t){
+  const topics = (r.topics || []).slice(0,4).join(' · ') || '—';
+  const oaUrl = `https://openalex.org/${r.id || ''}`;
+  return `<article class="raw-card">
+    <div class="rc-name">${r.display_name || '—'}</div>
+    <div class="rc-topics">${t.rawTopics}: ${topics}</div>
+    <div class="rc-note">${lang==='ja'?'AI要約はまだありません — 数日後に自動生成されます':'No AI summary yet — will be generated automatically in a few days'}</div>
+    <div class="rc-src">
+      <a href="${oaUrl}" target="_blank" rel="noopener">OpenAlex</a>
+      ${r.orcid ? ` · <a href="${r.orcid}" target="_blank" rel="noopener">ORCID</a>` : ''}
+      <span class="checked">&nbsp;— ${lang==='ja'?'今日取得':'fetched today'}</span>
+    </div>
+  </article>`;
+}
+
+// 大学名→OpenAlex機関IDを検索して取得
+async function fetchInstId(univName){
+  const url = `https://api.openalex.org/institutions?search=${encodeURIComponent(univName)}&filter=country_code:JP&per_page=1`;
+  try{
+    const d = await fetch(url).then(r=>r.json());
+    return d.results?.[0]?.id?.split('/').pop() || null;
+  }catch(e){ return null; }
+}
+
+// 機関IDから研究者を25人取得
+async function fetchResearchers(instId, page=1){
+  const url = `https://api.openalex.org/authors?filter=last_known_institutions.id:${instId},works_count:>10&sort=cited_by_count:desc&per_page=25&page=${page}`;
+  try{
+    const d = await fetch(url).then(r=>r.json());
+    return d.results || [];
+  }catch(e){ return []; }
+}
+
+// 「もっと見る」ボタンがクリックされたとき
+async function loadMoreResearchers(btn, univKey, univNameEn){
+  const t = ui[lang];
+  btn.disabled = true;
+  btn.classList.add('loading');
+
+  let instId = loadedPages[univKey]?.instId;
+  if(!instId){
+    instId = await fetchInstId(univNameEn);
+    if(!instId){
+      btn.textContent = t.noMore;
+      btn.disabled = true;
+      return;
+    }
+    loadedPages[univKey] = { instId, page: 0 };
+  }
+
+  const nextPage = (loadedPages[univKey].page || 0) + 1;
+  const results = await fetchResearchers(instId, nextPage);
+
+  if(!results.length){
+    btn.classList.remove('loading');
+    btn.textContent = t.noMore;
+    btn.disabled = true;
+    return;
+  }
+
+  loadedPages[univKey].page = nextPage;
+  if(!liveResearchers[univKey]) liveResearchers[univKey] = [];
+  liveResearchers[univKey].push(...results);
+
+  // セクションをレンダリング
+  const sectionId = 'usec-' + btoa(encodeURIComponent(univKey)).replace(/[^a-z0-9]/gi,'').slice(0,20);
+  let section = document.getElementById(sectionId);
+  if(!section){
+    section = document.createElement('div');
+    section.className = 'univ-section';
+    section.id = sectionId;
+    const header = document.createElement('div');
+    header.className = 'univ-section-header';
+    header.innerHTML = `<h2>${lang==='ja'?univKey:univNameEn} — ${lang==='ja'?'OpenAlex生データ':'OpenAlex live data'}</h2>`;
+    section.appendChild(header);
+    const grid = document.createElement('div');
+    grid.className = 'live-grid';
+    grid.id = sectionId + '-grid';
+    section.appendChild(grid);
+    btn.closest('.load-more-wrap')?.before(section);
+  }
+
+  const grid = document.getElementById(sectionId + '-grid') || section.querySelector('.live-grid');
+  results.forEach(r => grid.insertAdjacentHTML('beforeend', rawCard(r, t)));
+
+  btn.classList.remove('loading');
+  btn.disabled = false;
+  btn.querySelector('.btn-text').textContent =
+    `▼ ${lang==='ja'?'さらに読み込む':'Load more'} (${liveResearchers[univKey].length}${lang==='ja'?'人取得済み':' loaded'})`;
+}
+
+// render()のあとに各大学の「もっと見る」ボタンを差し込む
+function appendLoadMoreButtons(){
+  const t = ui[lang];
+  // 現在表示中のカードから大学を収集
+  const cards = document.querySelectorAll('#grid .card, #grid article');
+  const seen = new Set();
+  const univs = [];
+  professors.filter(p => {
+    if(activeField !== 'all' && p.field !== activeField) return false;
+    if(activeRegion !== 'all' && p.region !== activeRegion) return false;
+    return true;
+  }).forEach(p => {
+    const key = (p.aff?.en || p.aff?.ja || '');
+    if(key && !seen.has(key)){
+      seen.add(key);
+      univs.push({ key, name_en: p.aff?.en || key, name_ja: p.aff?.ja || key });
+    }
+  });
+
+  // 既存ボタンを削除
+  document.querySelectorAll('.load-more-wrap').forEach(el => el.remove());
+
+  // グリッドの後に大学ごとのボタンを追加
+  const grid = document.getElementById('grid');
+  univs.forEach(u => {
+    const wrap = document.createElement('div');
+    wrap.className = 'load-more-wrap';
+    wrap.style.cssText = 'max-width:1080px;margin:0 auto;padding:0 20px 8px;';
+    wrap.innerHTML = `
+      <button class="load-more-btn" onclick="loadMoreResearchers(this,'${u.key.replace(/'/g,"\'")}','${u.name_en.replace(/'/g,"\'")}')">
+        <span class="spinner"></span>
+        <span class="btn-text">+ ${lang==='ja'?u.name_ja:u.name_en} の研究者をもっと見る (OpenAlex)</span>
+      </button>`;
+    grid.after(wrap);
+  });
+}
+
+document.getElementById('searchBox').addEventListener('input', () => { render(); appendLoadMoreButtons(); });
+
+renderStatic(); render(); appendLoadMoreButtons(); tick(); loadLive();
 </script>
 
 </body>
