@@ -114,7 +114,7 @@ def main():
             print(f"[{i}/{len(todo)}] ✗ {rec['name_en']}: {e}", file=sys.stderr)
 
         # Gemini無料枠: 毎分15リクエスト制限 → 4秒間隔で安全に収まる
-        time.sleep(4.1)
+        time.sleep(32)
 
         if i % 50 == 0:  # 中断に強いよう逐次保存
             json.dump(cache, open(CACHE, "w", encoding="utf-8"), ensure_ascii=False)
