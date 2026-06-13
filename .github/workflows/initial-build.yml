@@ -1,59 +1,43 @@
 name: initial-build
-# 初回ビルドをGitHubの画面から1クリックで実行するワークフロー。
-# ローカルにPython環境がなくても、Actionsタブ → initial-build → Run workflow で
-# 259組織の解決 → 研究者取得 → AI要約 まで一気に走る。
-# 結果(unresolved.txt の未解決リスト含む)は自動でリポジトリにcommitされる。
-
 on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'scripts/**'
+      - 'data/universities_seed.csv'
+      - '.github/workflows/initial-build.yml'
   workflow_dispatch:
-    inputs:
-      per_univ:
-        description: "1組織あたりの研究者数(初回は5で試走→25で本走を推奨)"
-        default: "5"
-      summarize_limit:
-        description: "AI要約の上限人数(0=要約スキップ。まず0で実行し件数確認を推奨)"
-        default: "1500"
-
-permissions:
-  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
-      - uses: actions/setup-python@v5
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          python-version: "3.12"
+          python-version: '3.11'
 
-      - name: "Step 1: 259組織をOpenAlex機関IDに解決"
+      - name: Run build_master.py (institution resolution)
+        run: python scripts/build_master.py
         env:
-          OPENALEX_MAILTO: ${{ secrets.OPENALEX_MAILTO }}
+          PYTHONUNBUFFERED: 1
+
+      - name: Run sync_researchers.py (OpenAlex data sync)
+        run: python scripts/sync_researchers.py
+        env:
+          PYTHONUNBUFFERED: 1
+          MAX_PER_INST: "120"
+
+      - name: Commit & push data changes
         run: |
-          python scripts/build_master.py | tee build_log.txt
-          echo "## 機関解決レポート" >> $GITHUB_STEP_SUMMARY
-          tail -5 build_log.txt >> $GITHUB_STEP_SUMMARY
-          if [ -s data/unresolved.txt ]; then
-            echo "### ⚠ 未解決(name_enの修正が必要)" >> $GITHUB_STEP_SUMMARY
-            cat data/unresolved.txt >> $GITHUB_STEP_SUMMARY
+          git config user.name "ask-the-world-bot"
+          git config user.email "sharekyoto@gmail.com"
+          git add data/
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "build: sync researchers ($(date -u +'%Y-%m-%d %H:%M:%S UTC'))"
+            git push
           fi
-
-      - name: "Step 2: 研究者を取得(差分検出・アーカイブ統合)"
-        env:
-          OPENALEX_MAILTO: ${{ secrets.OPENALEX_MAILTO }}
-        run: python scripts/sync_researchers.py --per-univ ${{ inputs.per_univ }} --track-moves
-
-      - name: "Step 3: 変更分のAI要約(limit=0ならスキップ)"
-        if: ${{ inputs.summarize_limit != '0' }}
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: python scripts/summarize.py --limit ${{ inputs.summarize_limit }}
-
-      - name: "結果をcommit"
-        run: |
-          git config user.name "toi-bot"
-          git config user.email "bot@users.noreply.github.com"
-          git add data/ cache/ || true
-          git diff --cached --quiet || git commit -m "initial build: $(date -u +%F)"
-          git push
