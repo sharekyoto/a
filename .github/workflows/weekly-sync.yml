@@ -28,7 +28,7 @@ jobs:
 
       - name: Summarize changed researchers only
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python scripts/summarize.py --limit 500   # 週あたりコスト上限
 
       - name: Commit updated data
