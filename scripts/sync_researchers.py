@@ -1,175 +1,224 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-sync_researchers.py — 各大学の研究者をOpenAlexから取得し、差分を検出する
-==========================================================================
-入力 : data/institutions.json
-出力 : data/researchers.json  (全研究者 + 出典 + 取得日時)
-       data/changed_ids.txt   (前回から変化した研究者ID → 要約の再生成対象)
+sync_researchers.py  —  研究者の取得・差分・アーカイブ (Ask the World)
 
-更新の仕組み(無料で自走させる設計):
-  OpenAlexの from_updated_date フィルタは有料プラン限定のため、
-  代わりに「毎週全件を再取得 → レコードのハッシュを前回と比較」する。
-  機関259組織 × 1リクエスト程度なので毎週数分・コストゼロで完了する。
-  変化があった研究者だけが summarize.py でAI要約を再生成される。
+decision 1: Gemini は使わない (クリティカルパスから除外)。
+decision 2: 職階ではなく「所属研究者を活動量順に」。topics を必ず持たせる。
+消さない設計: いなくなった研究者も status=archived で残す。
 
-アーカイブポリシー(消さない設計):
-  このツールの目的は大学選びではなく「師匠との出会い」なので、
-  一度収集した研究者は、所属組織が選定基準から外れても・取得上位から
-  落ちても削除しない。archived=true を付けて検索に残し続け、
-  最終確認日(retrieved_at)は最後に実在確認できた日のまま据え置く。
-  容量影響: 1人約1KB。1万人でも約10MBで、無料枠の誤差の範囲。
+入力 : data/institutions.json   (build_master.py の出力)
+出力 : data/researchers.json    (フルデータ + 差分メタ)
+        data/site_data.json     (フロント用の軽量サブセット)
 
-実行: python scripts/sync_researchers.py [--per-univ 25] [--min-works 20]
-環境変数: OPENALEX_MAILTO=you@example.com
+OpenAlex のみ。APIキー不要。
 """
-import argparse, hashlib, json, os, sys, time, urllib.parse, urllib.request
-from datetime import date
 
-API = "https://api.openalex.org/authors"
-MAILTO = os.environ.get("OPENALEX_MAILTO", "")
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-INST = os.path.join(ROOT, "data", "institutions.json")
-OUT = os.path.join(ROOT, "data", "researchers.json")
-CHANGED = os.path.join(ROOT, "data", "changed_ids.txt")
+import hashlib
+import json
+import os
+import time
+import urllib.parse
+import urllib.request
+import urllib.error
+from collections import OrderedDict
+from pathlib import Path
+
+# --- 設定 ----------------------------------------------------------------
+MAILTO = "sharekyoto@gmail.com"
+API = "https://api.openalex.org"
+
+ROOT = Path(__file__).resolve().parent.parent
+DATA = ROOT / "data"
+INST_IN = DATA / "institutions.json"
+RES_OUT = DATA / "researchers.json"
+SITE_OUT = DATA / "site_data.json"
+
+# シードは「薄く広く」。深い層はフロントのオンデマンド取得 (index.html) に任せる。
+# 0 を渡すと「全員」 (上限なし)。
+MAX_PER_INST = int(os.environ.get("MAX_PER_INST", "120"))
+PER_PAGE = 200
+SELECT = ("id,display_name,orcid,works_count,cited_by_count,"
+          "summary_stats,topics,last_known_institutions")
+TODAY = time.strftime("%Y-%m-%d", time.gmtime())
+
+# --- HTTP ----------------------------------------------------------------
+def fetch(path, **params):
+    params["mailto"] = MAILTO
+    url = f"{API}{path}?{urllib.parse.urlencode(params)}"
+    for attempt in range(6):
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": f"ask-the-world ({MAILTO})"})
+            with urllib.request.urlopen(req, timeout=40) as r:
+                return json.load(r)
+        except urllib.error.HTTPError as e:
+            if e.code == 429:
+                time.sleep(2 ** attempt)
+                continue
+            raise
+        except (urllib.error.URLError, TimeoutError):
+            time.sleep(1 + attempt)
+    raise RuntimeError(f"request failed: {url}")
 
 
-def fetch(url: str) -> dict:
-    req = urllib.request.Request(url, headers={"User-Agent": "toi-univ-search/0.1"})
-    with urllib.request.urlopen(req, timeout=30) as r:
-        return json.load(r)
+def bare_id(u):
+    return u.rsplit("/", 1)[-1]
 
 
-def top_authors(inst_id: str, per_univ: int, min_works: int) -> list[dict]:
-    """被引用数上位の現役研究者を取得。"""
-    params = {
-        "filter": f"last_known_institutions.id:{inst_id},works_count:>{min_works}",
-        "sort": "cited_by_count:desc",
-        "per_page": str(per_univ),
-        "select": "id,display_name,orcid,works_count,cited_by_count,"
-                  "summary_stats,topics,last_known_institutions",
-    }
-    if MAILTO:
-        params["mailto"] = MAILTO
-    return fetch(API + "?" + urllib.parse.urlencode(params)).get("results", [])
+# --- 1人分のレコードへ正規化 --------------------------------------------
+def normalize(author, inst):
+    raw = author.get("topics") or []
+    topics = [t["display_name"] for t in raw[:6]]
+    # 問いの木との突合キー: OpenAlex の field id (例 "31") を重複なく集める
+    field_ids, field_names = [], []
+    for t in raw:
+        f = t.get("field") or {}
+        fid = (f.get("id") or "").rsplit("/", 1)[-1]
+        if fid and fid not in field_ids:
+            field_ids.append(fid)
+            field_names.append(f.get("display_name"))
+    rec = OrderedDict(
+        id=bare_id(author["id"]),
+        name=author["display_name"],
+        orcid=author.get("orcid"),
+        inst_id=inst.get("openalex_id") or inst.get("id"),
+        inst_name=inst.get("resolved_name") or inst.get("name_ja") or inst.get("name"),
+        country=inst.get("country"),
+        works_count=author.get("works_count", 0),
+        cited_by_count=author.get("cited_by_count", 0),
+        h_index=(author.get("summary_stats") or {}).get("h_index", 0),
+        topics=topics,
+        fields=field_ids,            # ["31","19"] のような field id 配列
+        field_names=field_names,
+    )
+    return rec
 
 
-def record_hash(rec: dict) -> str:
-    """要約の再生成が必要かを判定するための内容ハッシュ。
-    研究テーマ(topics)と業績規模が変わったときだけ変化する。"""
-    core = {
-        "name": rec["name_en"],
-        "topics": rec["topics"],
-        "works_count": rec["works_count"] // 10,  # 細かい増減では発火させない
-    }
-    return hashlib.sha256(
-        json.dumps(core, sort_keys=True, ensure_ascii=False).encode()
-    ).hexdigest()[:16]
+def content_hash(rec):
+    """変化検出用。表示に効くフィールドだけを対象にする。"""
+    key = json.dumps(
+        [rec["name"], rec["inst_id"], rec["works_count"],
+         rec["cited_by_count"], rec["h_index"], rec["topics"], rec["fields"]],
+        ensure_ascii=False, sort_keys=True,
+    )
+    return hashlib.sha1(key.encode("utf-8")).hexdigest()[:12]
 
 
-def current_institution(author_id: str) -> dict | None:
-    """個別著者の最新所属を1件取得(転出追跡用)。"""
-    params = {"select": "id,last_known_institutions"}
-    if MAILTO:
-        params["mailto"] = MAILTO
-    url = f"{API}/{author_id}?" + urllib.parse.urlencode(params)
-    insts = fetch(url).get("last_known_institutions") or []
-    if not insts:
-        return None
-    top = insts[0]
-    return {"name_en": top.get("display_name"),
-            "openalex_id": (top.get("id") or "").rsplit("/", 1)[-1]}
+# --- 機関ごとの研究者取得 (cursor ページング) ---------------------------
+def fetch_researchers(inst):
+    found, cursor = [], "*"
+    inst_id = inst.get("openalex_id") or inst.get("id")
+    if not inst_id:
+        return found
+    while cursor:
+        try:
+            d = fetch(
+                "/authors",
+                filter=f"last_known_institutions.id:{inst_id}",
+                sort="cited_by_count:desc",
+                per_page=PER_PAGE,
+                cursor=cursor,
+                select=SELECT,
+            )
+            for a in d.get("results") or []:
+                found.append(normalize(a, inst))
+                if MAX_PER_INST and len(found) >= MAX_PER_INST:
+                    return found
+            cursor = (d.get("meta") or {}).get("next_cursor")
+            time.sleep(0.1)
+        except Exception as e:
+            print(f"  error fetching {inst_id}: {e}")
+            break
+    return found
+
+
+# --- 既存データ読み込み --------------------------------------------------
+def load_existing():
+    if RES_OUT.exists():
+        prev = json.loads(RES_OUT.read_text(encoding="utf-8"))
+        # 古いバージョンは { "researchers": [...] } 形式、新しいのは直リスト
+        if isinstance(prev, dict):
+            return {r["id"]: r for r in prev.get("researchers", [])}
+        else:
+            return {r["id"]: r for r in prev}
+    return {}
 
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--per-univ", type=int, default=25,
-                    help="1大学あたりの研究者数(初期値25 → 全体で約6,000人)")
-    ap.add_argument("--min-works", type=int, default=20)
-    ap.add_argument("--track-moves", action="store_true",
-                    help="新たにアーカイブされた研究者の現所属を追跡(週次の追加コストは微小)")
-    args = ap.parse_args()
+    DATA.mkdir(parents=True, exist_ok=True)
+    if not INST_IN.exists():
+        raise SystemExit(f"先に build_master.py を実行してください ({INST_IN} がありません)")
 
-    institutions = json.load(open(INST, encoding="utf-8"))
-    prev_records: dict[str, dict] = {}
-    if os.path.exists(OUT):
-        prev_records = {r["openalex_id"]: r for r in
-                        json.load(open(OUT, encoding="utf-8"))}
-    prev_hash = {k: v.get("hash") for k, v in prev_records.items()}
-
-    today = date.today().isoformat()
-    researchers, changed = [], []
+    raw = json.loads(INST_IN.read_text(encoding="utf-8"))
+    institutions = raw if isinstance(raw, list) else raw.get("institutions", [])
+    existing = load_existing()
+    seen_ids = set()
+    added = updated = unchanged = 0
 
     for i, inst in enumerate(institutions, 1):
         try:
-            authors = top_authors(inst["openalex_id"], args.per_univ, args.min_works)
+            people = fetch_researchers(inst)
         except Exception as e:
-            print(f"  ! {inst['name_ja']}: {e}", file=sys.stderr)
+            name = inst.get("resolved_name") or inst.get("name_ja") or inst.get("name")
+            print(f"[skip] {name}: {e}")
             continue
 
-        for a in authors:
-            aid = a["id"].rsplit("/", 1)[-1]
-            rec = {
-                "openalex_id": aid,
-                "name_en": a["display_name"],
-                "orcid": a.get("orcid"),
-                "university_ja": inst["name_ja"],
-                "university_en": inst["name_en"],
-                "univ_type": inst["type"],
-                "org_kind": inst.get("org_kind", "university"),
-                "prefecture": inst["prefecture"],
-                "works_count": a.get("works_count", 0),
-                "cited_by_count": a.get("cited_by_count", 0),
-                "h_index": (a.get("summary_stats") or {}).get("h_index"),
-                "topics": [t["display_name"] for t in (a.get("topics") or [])[:6]],
-                "sources": [
-                    {"label": "OpenAlex", "url": a["id"]},
-                    {"label": "researchmap検索",
-                     "url": "https://researchmap.jp/researchers?q="
-                            + urllib.parse.quote(a["display_name"])},
-                ] + ([{"label": "ORCID", "url": a["orcid"]}] if a.get("orcid") else []),
-                "retrieved_at": today,
-            }
-            rec["hash"] = record_hash(rec)
-            rec["archived"] = False        # 今回の取得で実在確認できた
-            if prev_hash.get(aid) != rec["hash"]:
-                changed.append(aid)
-            researchers.append(rec)
+        for rec in people:
+            seen_ids.add(rec["id"])
+            h = content_hash(rec)
+            old = existing.get(rec["id"])
+            if old is None:
+                rec.update(status="active", first_seen=TODAY, updated=TODAY, hash=h)
+                existing[rec["id"]] = rec
+                added += 1
+            elif old.get("hash") != h:
+                rec.update(status="active",
+                           first_seen=old.get("first_seen", TODAY),
+                           updated=TODAY, hash=h)
+                existing[rec["id"]] = rec
+                updated += 1
+            else:
+                old["status"] = "active"
+                old["last_checked"] = TODAY
+                unchanged += 1
 
-        print(f"[{i}/{len(institutions)}] {inst['name_ja']}: {len(authors)}人")
-        time.sleep(0.12)
+        print(f"[{i}/{len(institutions)}] {inst['name']}: {len(people)}人")
 
-    # ---- アーカイブ統合(消さない設計の本体) ----
-    # 前回いたが今回の取得に出てこなかった研究者(所属が選定外になった/
-    # 取得上位から落ちた等)は、削除せず archived=true で残す。
-    # retrieved_at は据え置き = 「最終確認日が古いまま検索に出る」仕様。
-    current_ids = {r["openalex_id"] for r in researchers}
-    archived_count = moved_count = 0
-    for aid, old in prev_records.items():
-        if aid not in current_ids:
-            newly_archived = not old.get("archived")
-            old["archived"] = True
-            # 転出追跡: 今回初めてアーカイブされた人だけ現所属を1回確認。
-            # 「師匠を追いかける」ための機能 — 引退ではなく転出なら行き先を示す。
-            if args.track_moves and newly_archived and not old.get("moved_to"):
-                try:
-                    now = current_institution(aid)
-                    if now and now["name_en"] and now["name_en"] != old["university_en"]:
-                        old["moved_to"] = now
-                        moved_count += 1
-                    time.sleep(0.12)
-                except Exception:
-                    pass  # 追跡失敗は致命的でない。次回再試行される
-            researchers.append(old)   # 古い retrieved_at のまま保持
-            archived_count += 1
+    # 消さない設計: 今回見つからなかった既存研究者は archived にして残す
+    archived = 0
+    for rid, rec in existing.items():
+        if rid not in seen_ids and rec.get("status") != "archived":
+            rec["status"] = "archived"
+            rec["archived_on"] = TODAY
+            archived += 1
 
-    json.dump(researchers, open(OUT, "w", encoding="utf-8"),
-              ensure_ascii=False, indent=1)
-    open(CHANGED, "w").write("\n".join(changed))
-    active = len(researchers) - archived_count
-    print(f"\n現役: {active}人 / アーカイブ: {archived_count}人"
-          f"(うち今回転出検出: {moved_count}人) / "
-          f"要再要約(新規+変更): {len(changed)}人")
-    print(f"→ {OUT}\n→ {CHANGED}")
+    researchers = sorted(existing.values(),
+                         key=lambda r: r.get("cited_by_count", 0), reverse=True)
+
+    RES_OUT.write_text(json.dumps(
+        OrderedDict(generated=TODAY, count=len(researchers), researchers=researchers),
+        ensure_ascii=False, indent=2), encoding="utf-8")
+
+    # フロント用の軽量サブセット (active のみ・余分なメタを落とす)
+    site = [
+        OrderedDict(
+            id=r["id"], name=r["name"], inst=r["inst_name"], country=r["country"],
+            works=r["works_count"], cited=r["cited_by_count"], h=r["h_index"],
+            topics=r["topics"], fields=r.get("fields", []), orcid=r.get("orcid"),
+        )
+        for r in researchers if r.get("status") == "active"
+    ]
+    SITE_OUT.write_text(json.dumps(
+        OrderedDict(generated=TODAY, count=len(site),
+                    institutions=[{"id": x["id"], "name": x["name"],
+                                   "country": x.get("country"), "field": x.get("field")}
+                                  for x in institutions],
+                    researchers=site),
+        ensure_ascii=False, indent=2), encoding="utf-8")
+
+    print("\n=== 完了 ===")
+    print(f"新規 {added} / 更新 {updated} / 不変 {unchanged} / アーカイブ {archived}")
+    print(f"合計 {len(researchers)}人 (active {len(site)}人)  ->  {RES_OUT.name}, {SITE_OUT.name}")
 
 
 if __name__ == "__main__":
