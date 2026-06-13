@@ -1,41 +1,39 @@
-name: weekly-sync
-# 毎週月曜 03:00 JST に研究者データを同期し、変更分だけAI要約を再生成する。
-# GitHub Actions 無料枠(public repoは無制限)+ OpenAlex無料API で稼働。
-# 唯一の従量コストは Anthropic API(変更分のみ・--limit で上限管理)。
+name: Weekly Data Sync
 
 on:
   schedule:
-    - cron: "0 18 * * 0"   # 日曜18:00 UTC = 月曜03:00 JST
-  workflow_dispatch: {}     # 手動実行も可能
-
-permissions:
-  contents: write
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
 
 jobs:
   sync:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v4
         with:
-          python-version: "3.12"
+          python-version: '3.11'
 
-      - name: Sync researchers from OpenAlex (diff detection)
+      - name: Build institutions
         env:
-          OPENALEX_MAILTO: ${{ secrets.OPENALEX_MAILTO }}
-        run: python scripts/sync_researchers.py --per-univ 25 --track-moves
+          MAILTO: sharekyoto@gmail.com
+        run: python3 scripts/build_master.py
 
-      - name: Summarize changed researchers only
+      - name: Sync researchers
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: python scripts/summarize.py --limit 500   # 週あたりコスト上限
+          MAILTO: sharekyoto@gmail.com
+          MAX_PER_INST: '120'
+        run: python3 scripts/sync_researchers.py
 
-      - name: Commit updated data
+      - name: Commit changes
         run: |
-          git config user.name "toi-bot"
-          git config user.email "bot@users.noreply.github.com"
-          git add data/ cache/
-          git diff --cached --quiet || git commit -m "weekly sync: $(date -u +%F)"
-          git push
-      # GitHub Pages を有効化していれば、push後に静的サイトが自動再公開される
+          git config user.name "Ask the World Bot"
+          git config user.email "sharekyoto@gmail.com"
+          git add data/institutions.json data/researchers.json data/site_data.json
+          git diff --cached --quiet || git commit -m "data: weekly sync $(date -u +'%Y-%m-%d')"
+
+      - name: Push
+        run: git push origin main

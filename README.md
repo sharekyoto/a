@@ -1,132 +1,22 @@
-# 問いから探す大学検索 — 日本版データパイプライン
+# Ask the World / 問いから探す大学検索
 
-高校1・2年生が「偏差値」ではなく「心が動く問い」から大学・学部を探すための
-検索サイトのデータ基盤。**国公立すべて + 選定私立 + 国立研究機関 = 259組織**を収録。
+心が動く「問い」から、世界の研究者(師匠)に出会えるバイリンガル検索サイト。
 
-## 収録大学(2026-06時点のシード)
+## 🚀 Links
+- **Live**: https://sharekyoto.github.io/a/
+- **Data**: OpenAlex (free, no key required)
 
-| 区分 | 校数 | 基準 |
-|---|---|---|
-| 国立大学 | 85 | 全校(2024年の東京科学大学統合を反映) |
-| 公立大学 | 99 | 全校(文科省「全国大学一覧」と毎年照合) |
-| 私立大学 | 62 | 下記の3層基準 |
-| 国立研究機関 | 13 | 大学外の師匠候補(理研・JAXA等)
-
-### 私立の選定基準(自動更新可能な客観基準)
-- **A: 科研費上位(54校)** — KAKENで毎年公開される科研費新規採択件数の私立上位。
-  研究が実際に動いている大学を、偏差値や知名度と無関係に拾う。
-- **B: 分野多様性(6校)** — 件数上位に入らないが分野の代替が利かない大学。
-  美術(多摩美・武蔵美)/リベラルアーツ(ICU)/数学・女子高等教育(津田塾)/
-  体育科学(日体大)/獣医・酪農(酪農学園)。
-- **C: 地域カバレッジ(2校)** — 国公私を重ねて空白になる地方の補完。
-  東北医科薬科(東北・私立医薬)、金沢工業(北陸・私立工学)。
-
-基準Aは毎年KAKENの公開データから再計算し、入替候補を自動提示する
-(リスト自体が自走する設計)。
-
-## アーキテクチャ
-
-```
-universities_seed.csv (246校・人手メンテは年1回)
-        │
-        ▼  build_master.py … OpenAlex機関IDに解決・誤りを自動検出
-institutions.json
-        │
-        ▼  sync_researchers.py … 週次。各校の研究者を取得しハッシュ差分検出
-researchers.json + changed_ids.txt
-        │
-        ▼  summarize.py … 変更分だけClaudeが「問い」に翻訳(キャッシュ)
-site_data.json ──▶ 静的サイト(GitHub Pages / Cloudflare Pages)
-```
-
-### 更新の仕組み(「ソース更新時に更新」の実装)
-- OpenAlexの `from_updated_date` フィルタは**有料プラン限定**のため使わない。
-  代わりに週次で全件再取得し(246リクエスト・数分)、研究トピックの
-  内容ハッシュを前回と比較して**ローカルで差分検出**する。完全無料。
-- AI要約は内容ハッシュをキーにキャッシュ。同じ研究内容に二度課金しない。
-- 全カードに出典リンク(OpenAlex / researchmap / ORCID)と取得日を保存。
-
-### コスト設計(基本無課金で運用)
-| 項目 | コスト |
-|---|---|
-| データ取得(OpenAlex) | ¥0(CC0・無料API) |
-| 実行基盤(GitHub Actions) | ¥0(public repo) |
-| 配信(GitHub Pages) | ¥0 |
-| AI要約(初回 約6,000人) | Haiku利用で数百〜千円程度・一回限り |
-| AI要約(週次・変更分のみ) | ほぼ¥0(--limitで上限管理) |
-
-## セットアップ
-
+## 📦 Local Development
 ```bash
-# 1. 機関ID解決(初回・年1回)
-export OPENALEX_MAILTO=you@example.com
-python scripts/build_master.py
-# → data/unresolved.txt に出た大学は name_en を直して再実行
-
-# 2. 研究者取得
-python scripts/sync_researchers.py --per-univ 25
-
-# 3. AI要約(初回はコスト確認のため --limit 推奨)
-export ANTHROPIC_API_KEY=sk-ant-...
-python scripts/summarize.py --limit 100
-
-# 4. サイト接続
-# index.html の `const professors = [...]` を
-# `const professors = await (await fetch('data/site_data.json')).json()` に変更
-
-# 5. 自動化: GitHubのSecretsに OPENALEX_MAILTO / ANTHROPIC_API_KEY を登録
-#    → .github/workflows/weekly-sync.yml が毎週月曜に自走
+bash publish_local.sh           # Generate data
+cd upload && python3 -m http.server 8000
+# http://localhost:8000
 ```
 
-## アーカイブポリシー(消さない設計)
+## 🏗️ Architecture
+- **index.html** — bilingual interface
+- **data/questions.json** — 28 questions × 8 clusters
+- **data/site_data.json** — researchers (auto-updated weekly)
+- **scripts/** — data pipeline (no Gemini on critical path)
 
-このツールの本質は大学選びではなく**「師匠(教授・助教)との出会い」**。
-したがって一度収集した研究者は、所属が選定基準から外れても削除しない。
-
-- 圏外になった研究者は `archived: true` で検索に残り続ける
-- 最終確認日(`checked`)は最後に実在確認できた日のまま据え置き表示
-  → 利用者は「情報がいつ時点か」を見て自分で判断できる
-- 要約はキャッシュ済みのため、アーカイブ保持の**追加課金はゼロ**
-
-### 容量の試算(無料枠内に余裕で収まる)
-| 規模 | site_data.json | 備考 |
-|---|---|---|
-| 初年度 約6,500人 | 約6〜8MB(gzip配信で1〜2MB) | 現役のみ |
-| 5年後 約15,000人 | 約15MB | アーカイブ含む |
-| 10年後 約30,000人 | 約30MB | GitHub上限(1GB)の3% |
-
-実務上の唯一の注意は単一JSONの初回読込速度。1万人を超えたら
-分野別(life/ai/earth/society/humanities/space)に6分割して遅延読込にする。
-
-## 「大学の次」への拡張設計(org_kind)
-
-5年後、大学以外の枠組みが「師匠のいる場所」として台頭する可能性に備え、
-組織は `org_kind` で一般化してある。**パイプラインは一切変更不要**で、
-シードCSVに行を足すだけで新しい種類の組織を収容できる。
-
-| org_kind | 状態 | 例 |
-|---|---|---|
-| university | 稼働中(246校) | 国公私立大学 |
-| institute | 稼働中(13機関) | 理研・JAXA・国立天文台・国語研など |
-| corporate_lab | 予約済み | 企業研究所(OpenAlexは企業所属研究者も収録済み) |
-| online_community | 予約済み | オンライン研究コミュニティ・市民科学 |
-| kosen | 予約済み | 高専(15歳で研究に出会える現実の選択肢) |
-| independent | 予約済み | 独立研究者・在野の専門家 |
-
-大学外の組織は「学部」を持たないため、UI上は学部タグの代わりに
-「ここで学ぶ経路」(インターン・オープンキャンパス・連携大学院など)を
-表示する設計とする。researchmapは大学外の研究者もカバーしているため、
-出典の枠組みもそのまま通用する。
-
-## データの正確性について
-- シードCSVは2026-06時点の人手作成。**文科省「全国大学一覧」(年1回更新)と
-  照合する監査を年次タスク**とすること(公立化・統合・改称が毎年ある)。
-- build_master.py が名称解決できない大学を `unresolved.txt` に出すため、
-  誤字・改称はパイプライン側で自動検出される。
-- AI要約は機械分類トピックに基づくため、カードに必ず一次情報リンクを表示し、
-  利用者が原典に遡れることを信頼性の担保とする。
-
-## 次の拡張
-1. researchmap / KAKEN APIによる日本語研究キーワードの取得(CiNii appid 登録で無料)
-2. 学部・学科テーブルとの紐付け(大学ポートレートのデータ活用)
-3. 英語圏大学への拡張(institutions.json に country を足すだけで同じパイプラインが回る)
+Contact: sharekyoto@gmail.com
