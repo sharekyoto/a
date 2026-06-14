@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>問いから探す | Ask the World</title>
+<title>きみの「なぜ」から、師匠を探す | Ask the World</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -142,8 +142,8 @@
    研究者ページへの https://openalex.org/<id> リンクは外部リンク(APIコールではない)。 */
 
 const T={
-  ja:{eyebrow:"問いから、世界の師匠へ", title:"問いから探す大学検索",
-    sub:"心が動く問いをひとつ選ぶと、それを探究している世界の研究者に出会えます。",
+  ja:{eyebrow:"好奇心は、いちばんの才能だ", title:"きみの「なぜ」から、師匠を探す",
+    sub:"心が動いた言葉で検索してみよう。それを“今まさに”研究している日本の先生に出会える。名前を押せば、その人の世界をもっと深く掘りにいける。きみの探究が、この地図を育てていく。",
     tab_q:"問いから探す", tab_s:"学校から探す", tab_k:"キーワードで探す",
     kgo:"探す", khint:"気になる言葉（例:再生医療、ブラックホール、AI）",
     khint2:"気になる言葉を入れると、それを研究している先生が活動量順に出ます。言葉が浮かばないときは「問いから探す」へ。",
@@ -155,10 +155,10 @@ const T={
     err:"うまく接続できませんでした。少し待ってもう一度。",
     count:"人", more:"もっと見る", back:"← 問いにもどる",
     qnote:"この問いとつながる分野の研究者を、活動量の多い順に表示しています。", inthis:"の研究者",
-    works:"論文", cited:"被引用", h:"h指数", profile:"OpenAlex",
+    works:"論文", cited:"被引用", h:"h指数", profile:"OpenAlex", dig:"この先生を深掘り",
     foot:"データ: OpenAlex（CC0・全世界）"},
-  en:{eyebrow:"From a question to a mentor", title:"Ask the World",
-    sub:"Pick a question that moves you, and meet researchers exploring it around the world.",
+  en:{eyebrow:"Curiosity is your greatest talent", title:"From your “why” to a mentor",
+    sub:"Search a word that moves you and meet a researcher in Japan exploring it right now. Tap a name to dig deeper into their world — your curiosity grows this map.",
     tab_q:"By question", tab_s:"By school", tab_k:"By keyword",
     kgo:"Search", khint:"a word you're curious about (e.g. regenerative medicine, black holes, AI)",
     khint2:"Type a word and meet researchers working on it, sorted by activity. Not sure what to type? Try 'By question'.",
@@ -170,7 +170,7 @@ const T={
     err:"Couldn't connect. Try again in a moment.",
     count:"", more:"Show more", back:"← Back to questions",
     qnote:"Researchers in fields connected to this question, sorted by research activity.", inthis:"researchers",
-    works:"works", cited:"cited", h:"h-index", profile:"OpenAlex",
+    works:"works", cited:"cited", h:"h-index", profile:"OpenAlex", dig:"Dig deeper",
     foot:"Data: OpenAlex (CC0 · global)"}
 };
 let lang="ja", SITE=null, QDATA=null, LEX=null, IDATA=null, SUM={};
@@ -314,6 +314,9 @@ function card(r,fromSite){
   const fieldChips=fieldLabels(r).map(j=>`<span class="chip">${j}</span>`).join("");
   const sumJa=(r.id&&SUM&&SUM[r.id]&&SUM[r.id].ja)||"";   // AI日本語要約(あれば。無ければ分野チップが説明役)
   const orcid=r.orcid?`<a href="${r.orcid}" target="_blank" rel="noopener">ORCID ↗</a>`:"";
+  // 名前クリック → Google AI モードで「自分で深掘り」するきっかけに(新タブ)
+  const digQ=`${name}${inst?`（${inst}）`:""}はどんな研究をしている研究者ですか？高校生にもわかるように教えて`;
+  const digHref=`https://www.google.com/search?udm=50&q=${encodeURIComponent(digQ)}`;
   // 指標は「活躍度」風に。数値は丸めて日本語で、応援したくなるトーンに。
   const vibe = lang!=="ja"
     ? `${works.toLocaleString()} works · ${cited.toLocaleString()} cited`
@@ -322,13 +325,13 @@ function card(r,fromSite){
         : `🌱 研究を ${jaNum(works)}本 発表 ・ これからが楽しみな先生`);
   c.innerHTML=`
     <div class="top">
-      <div><h3 class="name"><a href="https://openalex.org/${oid}" target="_blank" rel="noopener">${name}</a></h3>
+      <div><h3 class="name"><a href="${digHref}" target="_blank" rel="noopener">${name}</a></h3>
         <div class="aff">${flag(cc)} ${inst}</div></div>
     </div>
     <div class="topics">${fieldChips}</div>
     ${sumJa?`<div class="summary">${sumJa}</div>`:""}
     <div class="vibe">${vibe}</div>
-    <div class="links"><a href="https://openalex.org/${oid}" target="_blank" rel="noopener">${T[lang].profile} ↗</a>${orcid}</div>`;
+    <div class="links"><a href="${digHref}" target="_blank" rel="noopener">${T[lang].dig} ↗</a><a href="https://openalex.org/${oid}" target="_blank" rel="noopener">${T[lang].profile} ↗</a>${orcid}</div>`;
   return c;
 }
 
