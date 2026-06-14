@@ -26,6 +26,16 @@
   .lang button{border:0;background:transparent;color:var(--ink-soft);padding:7px 13px;cursor:pointer}
   .lang button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
 
+  .aboutlink{margin-top:14px;border:0;background:transparent;color:var(--coral);font-family:inherit;font-size:13.5px;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:3px}
+  .about-ov{position:fixed;inset:0;background:rgba(28,42,69,.5);display:flex;align-items:flex-start;justify-content:center;padding:24px;overflow:auto;z-index:50}
+  .about-ov[hidden]{display:none}
+  .about-card{background:var(--paper);max-width:680px;width:100%;border-radius:18px;padding:clamp(24px,5vw,44px);position:relative;box-shadow:0 20px 60px rgba(28,42,69,.3);margin:auto}
+  .about-x{position:absolute;top:12px;right:16px;border:0;background:transparent;font-size:28px;line-height:1;color:var(--ink-soft);cursor:pointer}
+  .about-card h2{font-family:"Fraunces",serif;font-size:clamp(22px,4vw,30px);margin:0 0 8px;color:var(--ink)}
+  .about-card .lead{color:var(--ink-soft);font-size:14.5px;line-height:1.85;margin:0 0 8px}
+  .about-card h3{font-size:15px;margin:24px 0 5px;color:var(--coral)}
+  .about-card p{font-size:14px;line-height:1.85;color:var(--ink);margin:0}
+  .about-card .end{margin-top:28px;padding-top:18px;border-top:1px solid var(--line);font-family:"Fraunces",serif;font-size:16px;line-height:1.75;color:var(--ink)}
   .growth{margin:0 0 20px;padding:13px 16px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,rgba(44,122,107,.06),rgba(44,122,107,.02))}
   .growth .nums{display:flex;flex-wrap:wrap;gap:18px}
   .growth .n{font-family:"Space Mono",monospace}
@@ -99,6 +109,7 @@
       <p class="eyebrow" data-i="eyebrow"></p>
       <h1 data-i="title"></h1>
       <p class="sub" data-i="sub"></p>
+      <button id="aboutBtn" class="aboutlink" data-i="aboutlink"></button>
     </div>
     <div class="lang" role="group" aria-label="language">
       <button data-set="ja" aria-pressed="true">JP</button>
@@ -145,6 +156,13 @@
   <footer data-i="foot"></footer>
 </div>
 
+<div id="about" class="about-ov" hidden>
+  <div class="about-card">
+    <button id="aboutClose" class="about-x" aria-label="close">×</button>
+    <div id="aboutBody"></div>
+  </div>
+</div>
+
 <script>
 /* ライブAPIゼロ: ブラウザからは OpenAlex を一切叩かない。データは夜間ビルドの静的JSONのみ。
    研究者ページへの https://openalex.org/<id> リンクは外部リンク(APIコールではない)。 */
@@ -164,7 +182,7 @@ const T={
     count:"人", more:"もっと見る", back:"← 問いにもどる",
     qnote:"この問いとつながる分野の研究者を、活動量の多い順に表示しています。", inthis:"の研究者",
     works:"論文", cited:"被引用", h:"h指数", profile:"OpenAlex", dig:"この先生を深掘り",
-    gschool:"学校", gpref:"都道府県", gppl:"人の研究者", grow_t:"育ち続ける地図", gmsg:"きみの検索が、次の誰かの探索の道しるべになる。",
+    gcountry:"カ国", gschool:"学校", gpref:"都道府県", gppl:"人の研究者", grow_t:"育ち続ける地図", gmsg:"きみの検索が、次の誰かの探索の道しるべになる。", aboutlink:"このサイトについて ▸",
     foot:"データ: OpenAlex（CC0・全世界）"},
   en:{eyebrow:"Curiosity is your greatest talent", title:"From your “why” to a mentor",
     sub:"Search a word that moves you and meet a researcher in Japan exploring it right now. Tap a name to dig deeper into their world — your curiosity grows this map.",
@@ -180,7 +198,7 @@ const T={
     count:"", more:"Show more", back:"← Back to questions",
     qnote:"Researchers in fields connected to this question, sorted by research activity.", inthis:"researchers",
     works:"works", cited:"cited", h:"h-index", profile:"OpenAlex", dig:"Dig deeper",
-    gschool:"schools", gpref:"prefectures", gppl:"researchers", grow_t:"A map that keeps growing", gmsg:"your search becomes a signpost for the next explorer.",
+    gcountry:"countries", gschool:"schools", gpref:"prefectures", gppl:"researchers", grow_t:"A map that keeps growing", gmsg:"your search becomes a signpost for the next explorer.", aboutlink:"About ▸",
     foot:"Data: OpenAlex (CC0 · global)"}
 };
 let lang="ja", SITE=null, QDATA=null, LEX=null, IDATA=null, SUM={};
@@ -238,13 +256,14 @@ function fieldLabels(r){
 function renderGrowth(){
   const el=document.getElementById("growth"); if(!el) return;
   const list=Array.isArray(IDATA)?IDATA:((IDATA&&IDATA.institutions)||[]);
-  const schools=new Set(), prefs=new Set();
-  list.forEach(i=>{ const en=i.resolved_name||i.name||i.name_en; if(en) schools.add(en); if(i.prefecture) prefs.add(i.prefecture); });
+  const schools=new Set(), prefs=new Set(), countries=new Set();
+  list.forEach(i=>{ const en=i.resolved_name||i.name||i.name_en; if(en) schools.add(en); if(i.prefecture) prefs.add(i.prefecture); if(i.country) countries.add(i.country); });
   if(!schools.size){ el.hidden=true; return; }
   const rows=siteReady?(Array.isArray(SITE)?SITE:((SITE&&SITE.researchers)||[])):null;
   const ppl=rows?rows.length.toLocaleString():"…";
   el.hidden=false;
   el.innerHTML=`<div class="nums">
+    <span class="n"><b>${countries.size||1}</b><span>${T[lang].gcountry}</span></span>
     <span class="n"><b>${schools.size.toLocaleString()}</b><span>${T[lang].gschool}</span></span>
     <span class="n"><b>${prefs.size}</b><span>${T[lang].gpref}</span></span>
     <span class="n"><b>${ppl}</b><span>${T[lang].gppl}</span></span>
@@ -505,6 +524,52 @@ document.getElementById("kgo").onclick=async()=>{const q=document.getElementById
 document.getElementById("kq").addEventListener("keydown",async e=>{if(e.key==="Enter"){const q=e.target.value.trim();if(q){await ensureSite(document.getElementById("kresults"));kwSearch(q);}}});
 
 /* ---- boot ---- */
+/* ---- About(突っ込みどころへの客観フォロー＋熱い想い) ---- */
+const ABOUT={
+  title:{ja:"このサイトについて",en:"About"},
+  lead:{ja:"点数や偏差値の前に、“心が動く問い”がある。AIが多くの仕事を変えていくこれからの時代、いちばん大切なのは『自分が何にワクワクするか』を知り、それを“今まさに”探究している本物の大人——師匠に出会うこと。このサイトは、きみが自分の興味から進路を選ぶための地図です。",
+    en:"Before grades and rankings, there is a question that moves you. In an age where AI keeps reshaping work, what matters most is knowing what excites you — and meeting a real researcher exploring it right now. This is a map to help you choose your path from your own curiosity."},
+  items:[
+    {q:{ja:"「活躍度」って何？人を数字で測るの？",en:"What is “activity”? Are you ranking people by numbers?"},
+     a:{ja:"いいえ、人の価値は数字では測れません。ここでの数字は「発表した研究の数」と「その研究が世界の研究者にどれだけ参考にされたか(被引用)」をやさしく言い換えただけ。注目の“目安”であって、若い挑戦や数字に表れない大切な研究も山ほどあります。だから“すごさ比べ”ではなく“出会いのきっかけ”として見てください。（この言葉がベストかはまだ迷い中で、もっと良い表現を探しています。）",
+        en:"No — a person’s worth can’t be measured in numbers. These figures simply restate how many studies someone has published and how often other researchers built on them (citations). It’s a rough signal of attention, not a ranking; plenty of young or quietly vital work never shows up. Treat it as a doorway, not a scoreboard."}},
+    {q:{ja:"名前が英語(ローマ字)なのはなぜ？",en:"Why are the names in romaji?"},
+     a:{ja:"元データ(OpenAlex)が世界共通のローマ字で名前を持っているからです。漢字名がある人から少しずつ日本語に置き換えています。",
+        en:"The source data (OpenAlex) stores names in romaji. We’re gradually swapping in kanji where available."}},
+    {q:{ja:"これで日本の大学・先生は全部？",en:"Is this every university and researcher in Japan?"},
+     a:{ja:"まだ道半ばです。国公立＋主要私立の259校を土台に、毎晩少しずつ研究者が増えていく“育ち続ける地図”。今日より明日のほうが豊かになります。",
+        en:"Not yet. Built on 259 national, public and major private universities, the map grows a little every night — richer tomorrow than today."}},
+    {q:{ja:"研究内容が英語で難しい",en:"The research topics are in English and hard to read."},
+     a:{ja:"AIが研究内容を高校生向けのやさしい日本語にする作業を、少しずつ進めています。まだ要約がない先生は分野名で表示しています。",
+        en:"An AI is gradually rewriting each researcher’s work into plain Japanese. Until a summary exists, we show the field name."}},
+    {q:{ja:"お金はかかる？広告は？個人情報は？",en:"Does it cost money? Ads? My data?"},
+     a:{ja:"完全無料・広告ゼロ・登録不要。あなたの個人情報は集めません。訪問者が増えても費用が増えない作り(ブラウザは作り置きデータを読むだけ)なので、ずっと無料を続けられます。",
+        en:"Free, ad-free, no sign-up — and we don’t collect your personal data. By design, more visitors don’t cost more, so it can stay free for good."}},
+    {q:{ja:"どうやって“育つ”の？",en:"How does it “grow”?"},
+     a:{ja:"毎晩、無料の範囲で各大学の研究者を少しずつ増やしています。やがて「みんなの検索」が次に来た人の出会いにつながる仕組みも足していきます。",
+        en:"Every night it adds a few more researchers per school, within free limits. Soon, everyone’s searches will directly shape what grows next."}},
+    {q:{ja:"データの出典は？間違いがあったら？",en:"Where does the data come from? What if it’s wrong?"},
+     a:{ja:"出典はOpenAlex(CC0・世界中の論文データ)。研究者ご本人がOpenAlexやORCIDのプロフィールを整えると、ここの表示も良くなります。",
+        en:"Data comes from OpenAlex (CC0). Researchers who tidy their OpenAlex/ORCID profile will see this improve too."}},
+    {q:{ja:"名前を押すと何が起きる？",en:"What happens when I tap a name?"},
+     a:{ja:"その先生について、Googleの“AIモード”が高校生にもわかるように説明してくれます。気になったら、そこから自分でどんどん深掘りを。",
+        en:"Google’s AI Mode explains that researcher in plain language. Get curious — then dig as deep as you like."}},
+  ],
+  end:{ja:"合格がゴールじゃない。18歳のきみが「自分は何に心を動かされ、どう生きたいか」を語れること。その最初の一歩を、たった一つの問いから。",
+    en:"Getting in isn’t the goal. The goal is that at 18 you can say what moves you and how you want to live — and it starts with a single question."}
+};
+function renderAbout(){
+  document.getElementById("aboutBody").innerHTML=
+    `<h2>${ABOUT.title[lang]}</h2><p class="lead">${ABOUT.lead[lang]}</p>`+
+    ABOUT.items.map(it=>`<h3>${it.q[lang]}</h3><p>${it.a[lang]}</p>`).join("")+
+    `<p class="end">${ABOUT.end[lang]}</p>`;
+}
+const $about=document.getElementById("about");
+document.getElementById("aboutBtn").onclick=()=>{ renderAbout(); $about.hidden=false; };
+document.getElementById("aboutClose").onclick=()=>{ $about.hidden=true; };
+$about.onclick=e=>{ if(e.target===$about) $about.hidden=true; };
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") $about.hidden=true; });
+
 // 起動: 軽いデータで即描画 → 重い site_data は裏で先読み開始(検索時に間に合わせる)
 loadLight().then(()=>{ applyLang(); loadSite(); });
 </script>

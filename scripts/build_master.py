@@ -127,7 +127,11 @@ def resolve_seed():
                 continue
             d = fetch("/institutions", search=query, per_page=1, select=SELECT)
             res = d.get("results") or []
-            if res:
+            if res and res[0].get("country_code") and res[0]["country_code"] != "JP":
+                # 日本のシードが非日本の機関に誤解決された → 採用しない(例: 同名の海外機関)
+                unresolved.append(f"{name_ja},{name_en}")
+                print(f"[seed] !! 非JPに誤解決のため除外: {name_ja or query} -> {res[0].get('display_name')} ({res[0].get('country_code')})")
+            elif res:
                 rec = compact(res[0], "seed", seed=row)
                 out.append(rec)
                 print(f"[seed] {name_ja or query}  ->  {rec['name']} ({rec['country']})")

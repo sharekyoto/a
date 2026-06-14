@@ -1,10 +1,9 @@
 {
   "generated": "2026-06-14T11:11:50Z",
-  "count": 241,
+  "count": 240,
   "coverage": {
     "countries": {
-      "JP": 240,
-      "IN": 1
+      "JP": 240
     },
     "fields": {
       "Unknown": 241
@@ -3408,23 +3407,6 @@
       "name_ja": "札幌市立大学",
       "name_en": "Sapporo City University",
       "prefecture": "北海道",
-      "kind": "public",
-      "org_kind": "university"
-    },
-    {
-      "id": "I4210122316",
-      "name": "Gifu College of Nursing",
-      "resolved_name": "Gifu College of Nursing",
-      "country": "IN",
-      "type": "education",
-      "works_count": 651,
-      "homepage": "http://www.gifu-cn.ac.jp/",
-      "ror": "https://ror.org/030290415",
-      "field": "Unknown",
-      "source": "seed",
-      "name_ja": "岐阜県立看護大学",
-      "name_en": "Gifu College of Nursing",
-      "prefecture": "岐阜県",
       "kind": "public",
       "org_kind": "university"
     },
