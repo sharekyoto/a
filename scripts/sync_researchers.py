@@ -84,6 +84,23 @@ def bare_id(u):
     return u.rsplit("/", 1)[-1] if u else None
 
 
+def has_cjk(s):
+    """漢字・かなを含むか(日本語名の判定)。"""
+    return any("぀" <= c <= "ヿ" or "一" <= c <= "鿿" or "ｦ" <= c <= "ﾝ"
+               for c in (s or ""))
+
+
+def pick_name(author):
+    """display_name がローマ字でも、別名候補に漢字名があればそれを優先。"""
+    primary = author.get("display_name", "") or ""
+    if has_cjk(primary):
+        return primary
+    for alt in (author.get("display_name_alternatives") or []):
+        if has_cjk(alt):
+            return alt
+    return primary
+
+
 def normalize(author, inst):
     """Normalize author to researcher record."""
     raw_topics = author.get("topics") or []
@@ -99,7 +116,7 @@ def normalize(author, inst):
 
     return OrderedDict(
         id=bare_id(author.get("id")),
-        name=author.get("display_name", ""),
+        name=pick_name(author),
         orcid=author.get("orcid"),
         inst_id=inst.get("openalex_id") or inst.get("id", ""),
         inst_name=inst.get("resolved_name") or inst.get("name_ja") or inst.get("name", ""),
@@ -115,7 +132,7 @@ def normalize(author, inst):
 def content_hash(rec):
     """Hash for change detection."""
     key = json.dumps(
-        [rec["name"], rec["inst_id"], rec["works_count"],
+        [rec["name"], rec.get("country"), rec["inst_id"], rec["works_count"],
          rec["cited_by_count"], rec["h_index"], rec["topics"], rec["fields"]],
         ensure_ascii=False, sort_keys=True,
     )
@@ -141,7 +158,7 @@ def fetch_researchers_page(inst_id, cursor):
         sort="cited_by_count:desc",
         per_page=PER_PAGE,
         cursor=cursor,
-        select="id,display_name,orcid,works_count,cited_by_count,summary_stats,topics",
+        select="id,display_name,display_name_alternatives,orcid,works_count,cited_by_count,summary_stats,topics",
     )
 
 
