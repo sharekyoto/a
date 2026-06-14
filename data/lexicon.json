@@ -1,0 +1,484 @@
+{
+  "version": 1,
+  "note": "入力の橋渡し(aliases)と出力の和訳(ja)を1ファイルに統合。fieldsは全26語ja/aliases完備。subfieldsは器(随時充填、空はfieldにフォールバック)。LEXICON_UNIFIED_SPEC.md準拠。",
+  "generated": "2026-06-14",
+  "fields": {
+    "11": {
+      "en": "Agricultural & Biological Sciences",
+      "ja": "農学・生物学",
+      "q": "食・農・生き物のしくみを探る",
+      "aliases": [
+        "食",
+        "食料",
+        "農業",
+        "作物",
+        "植物",
+        "動物",
+        "昆虫",
+        "生物",
+        "栄養",
+        "food",
+        "agricultur",
+        "plant",
+        "botan",
+        "animal",
+        "zoolog",
+        "insect",
+        "entomol",
+        "nutrition",
+        "biolog"
+      ]
+    },
+    "12": {
+      "en": "Arts & Humanities",
+      "ja": "人文・芸術",
+      "q": "言葉・歴史・芸術から人間を見つめる",
+      "aliases": [
+        "言語",
+        "言葉",
+        "歴史",
+        "哲学",
+        "文学",
+        "芸術",
+        "美術",
+        "音楽",
+        "文化",
+        "linguist",
+        "language",
+        "histor",
+        "philosoph",
+        "literature",
+        "art",
+        "aesthetic",
+        "music",
+        "cultur",
+        "humanities"
+      ]
+    },
+    "13": {
+      "en": "Biochemistry, Genetics & Molecular Biology",
+      "ja": "生化学・遺伝・分子生物",
+      "q": "遺伝子と細胞から生命のしくみを解く",
+      "aliases": [
+        "遺伝",
+        "遺伝子",
+        "ゲノム",
+        "細胞",
+        "再生医療",
+        "分子生物",
+        "タンパク質",
+        "gene",
+        "genetic",
+        "genom",
+        "cell",
+        "regenerat",
+        "molecular biology",
+        "protein"
+      ]
+    },
+    "14": {
+      "en": "Business, Management & Accounting",
+      "ja": "経営・会計",
+      "q": "組織やお金の動かし方を考える",
+      "aliases": [
+        "経営",
+        "会計",
+        "ビジネス",
+        "起業",
+        "management",
+        "business",
+        "accounting",
+        "entrepreneur"
+      ]
+    },
+    "15": {
+      "en": "Chemical Engineering",
+      "ja": "化学工学",
+      "q": "物質を作り変えるプロセスを設計する",
+      "aliases": [
+        "化学工学",
+        "プロセス工学",
+        "chemical engineering",
+        "process engineering"
+      ]
+    },
+    "16": {
+      "en": "Chemistry",
+      "ja": "化学",
+      "q": "分子のふるまいから物質を理解する",
+      "aliases": [
+        "化学",
+        "分子",
+        "触媒",
+        "反応",
+        "chemist",
+        "molecul",
+        "cataly",
+        "reaction"
+      ]
+    },
+    "17": {
+      "en": "Computer Science",
+      "ja": "情報科学",
+      "q": "情報とAIで世界を計算する",
+      "aliases": [
+        "ai",
+        "人工知能",
+        "機械学習",
+        "深層学習",
+        "ロボット",
+        "プログラ",
+        "プログラミング",
+        "情報",
+        "コンピュータ",
+        "コンピューター",
+        "暗号",
+        "データ",
+        "アルゴリズム",
+        "artificial intelligence",
+        "machine learning",
+        "neural",
+        "deep learning",
+        "robot",
+        "software",
+        "programming",
+        "computation",
+        "comput",
+        "cryptograph",
+        "data",
+        "algorithm"
+      ]
+    },
+    "18": {
+      "en": "Decision Sciences",
+      "ja": "意思決定科学",
+      "q": "最適な選び方・決め方を探る",
+      "aliases": [
+        "意思決定",
+        "最適化",
+        "オペレーション",
+        "decision",
+        "optimization",
+        "operations research"
+      ]
+    },
+    "19": {
+      "en": "Earth & Planetary Sciences",
+      "ja": "地球・惑星科学",
+      "q": "地球と惑星のなりたちを探る",
+      "aliases": [
+        "地球",
+        "惑星",
+        "地質",
+        "火山",
+        "地震",
+        "海洋",
+        "海",
+        "気象",
+        "planet",
+        "earthquake",
+        "seismic",
+        "volcan",
+        "ocean",
+        "marine",
+        "geolog",
+        "geo"
+      ]
+    },
+    "20": {
+      "en": "Economics, Econometrics & Finance",
+      "ja": "経済・金融",
+      "q": "お金と経済の動きを読み解く",
+      "aliases": [
+        "経済",
+        "金融",
+        "お金",
+        "財政",
+        "市場",
+        "econom",
+        "financ",
+        "monetary",
+        "market"
+      ]
+    },
+    "21": {
+      "en": "Energy",
+      "ja": "エネルギー",
+      "q": "エネルギーの作り方・ため方を探る",
+      "aliases": [
+        "エネルギー",
+        "電池",
+        "太陽光",
+        "再生可能",
+        "発電",
+        "energy",
+        "batter",
+        "solar",
+        "renewable",
+        "power"
+      ]
+    },
+    "22": {
+      "en": "Engineering",
+      "ja": "工学",
+      "q": "ものづくりと機械で社会を支える",
+      "aliases": [
+        "工学",
+        "機械",
+        "電気",
+        "建築",
+        "構造",
+        "ものづくり",
+        "engineer",
+        "mechanical",
+        "electrical",
+        "architect",
+        "structural"
+      ]
+    },
+    "23": {
+      "en": "Environmental Science",
+      "ja": "環境科学",
+      "q": "気候と環境の未来を守る",
+      "aliases": [
+        "気候",
+        "気候変動",
+        "環境",
+        "生態",
+        "生物多様性",
+        "汚染",
+        "climate",
+        "environment",
+        "ecolog",
+        "biodivers",
+        "pollution",
+        "sustainab"
+      ]
+    },
+    "24": {
+      "en": "Immunology & Microbiology",
+      "ja": "免疫学・微生物学",
+      "q": "ウイルスや免疫のしくみを解く",
+      "aliases": [
+        "ウイルス",
+        "免疫",
+        "感染",
+        "細菌",
+        "微生物",
+        "virus",
+        "viral",
+        "immun",
+        "infect",
+        "bacteria",
+        "microbio"
+      ]
+    },
+    "25": {
+      "en": "Materials Science",
+      "ja": "材料科学",
+      "q": "新しい素材を生み出す",
+      "aliases": [
+        "材料",
+        "半導体",
+        "金属",
+        "ナノ",
+        "素材",
+        "material",
+        "semiconductor",
+        "metal",
+        "nano"
+      ]
+    },
+    "26": {
+      "en": "Mathematics",
+      "ja": "数学",
+      "q": "数と図形の真理を探る",
+      "aliases": [
+        "数学",
+        "幾何",
+        "代数",
+        "解析",
+        "統計",
+        "確率",
+        "mathemat",
+        "statistic",
+        "geometry",
+        "algebra",
+        "probability"
+      ]
+    },
+    "27": {
+      "en": "Medicine",
+      "ja": "医学",
+      "q": "病気を治し健康を守る",
+      "aliases": [
+        "がん",
+        "癌",
+        "医療",
+        "医学",
+        "病気",
+        "臨床",
+        "老化",
+        "健康",
+        "cancer",
+        "oncolog",
+        "tumor",
+        "medic",
+        "clinical",
+        "disease",
+        "aging",
+        "ageing",
+        "health"
+      ]
+    },
+    "28": {
+      "en": "Neuroscience",
+      "ja": "神経科学",
+      "q": "脳と神経のはたらきを解く",
+      "aliases": [
+        "脳",
+        "神経",
+        "ニューロン",
+        "意識",
+        "認知",
+        "brain",
+        "neuro",
+        "consciousness",
+        "cognit"
+      ]
+    },
+    "29": {
+      "en": "Nursing",
+      "ja": "看護学",
+      "q": "人を支えるケアを科学する",
+      "aliases": [
+        "看護",
+        "ケア",
+        "nursing",
+        "care"
+      ]
+    },
+    "30": {
+      "en": "Pharmacology, Toxicology & Pharmaceutics",
+      "ja": "薬学・毒性学",
+      "q": "薬で体のしくみに働きかける",
+      "aliases": [
+        "薬",
+        "創薬",
+        "薬学",
+        "毒",
+        "pharmac",
+        "drug",
+        "toxicolog"
+      ]
+    },
+    "31": {
+      "en": "Physics & Astronomy",
+      "ja": "物理学・天文学",
+      "q": "宇宙と物質の根っこの法則を探る",
+      "aliases": [
+        "宇宙",
+        "うちゅう",
+        "ブラックホール",
+        "星",
+        "恒星",
+        "惑星",
+        "量子",
+        "物理",
+        "素粒子",
+        "天文",
+        "重力",
+        "相対性",
+        "cosmolog",
+        "astrophys",
+        "astronom",
+        "univers",
+        "galax",
+        "black hole",
+        "star",
+        "stellar",
+        "quantum",
+        "physic",
+        "particle",
+        "gravit"
+      ]
+    },
+    "32": {
+      "en": "Psychology",
+      "ja": "心理学",
+      "q": "心と行動のしくみを探る",
+      "aliases": [
+        "心理",
+        "記憶",
+        "感情",
+        "行動",
+        "psycholog",
+        "memory",
+        "emotion",
+        "behavior"
+      ]
+    },
+    "33": {
+      "en": "Social Sciences",
+      "ja": "社会科学",
+      "q": "社会・政治・教育のかたちを考える",
+      "aliases": [
+        "社会",
+        "政治",
+        "法",
+        "法律",
+        "教育",
+        "地理",
+        "都市",
+        "ジェンダー",
+        "social",
+        "sociolog",
+        "politic",
+        "law",
+        "legal",
+        "education",
+        "geograph",
+        "urban",
+        "gender"
+      ]
+    },
+    "34": {
+      "en": "Veterinary",
+      "ja": "獣医学",
+      "q": "動物の健康を守る",
+      "aliases": [
+        "獣医",
+        "動物医療",
+        "veterinar"
+      ]
+    },
+    "35": {
+      "en": "Dentistry",
+      "ja": "歯学",
+      "q": "歯と口の健康を守る",
+      "aliases": [
+        "歯",
+        "歯科",
+        "dental",
+        "dentist",
+        "oral health"
+      ]
+    },
+    "36": {
+      "en": "Health Professions",
+      "ja": "医療専門職",
+      "q": "医療を支える専門技術を究める",
+      "aliases": [
+        "リハビリ",
+        "理学療法",
+        "公衆衛生",
+        "医療技術",
+        "rehabilitation",
+        "physical therapy",
+        "public health",
+        "health profession"
+      ]
+    }
+  },
+  "subfields": {}
+}
