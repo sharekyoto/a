@@ -1,0 +1,118 @@
+{
+  "version": "1",
+  "note": "問いの木。各 question の fields は OpenAlex の field id。site_data.json の researcher.fields と突き合わせる。search は index.html のオンデマンド取得(全校横断)用フォールバック。",
+  "fields_index": {
+    "11": { "ja": "農学・生物学", "en": "Agricultural & Biological Sciences", "domain": "Life" },
+    "12": { "ja": "人文・芸術", "en": "Arts & Humanities", "domain": "Social" },
+    "13": { "ja": "生化学・遺伝・分子生物", "en": "Biochemistry, Genetics & Molecular Biology", "domain": "Life" },
+    "14": { "ja": "経営・会計", "en": "Business, Management & Accounting", "domain": "Social" },
+    "15": { "ja": "化学工学", "en": "Chemical Engineering", "domain": "Physical" },
+    "16": { "ja": "化学", "en": "Chemistry", "domain": "Physical" },
+    "17": { "ja": "情報科学", "en": "Computer Science", "domain": "Physical" },
+    "18": { "ja": "意思決定科学", "en": "Decision Sciences", "domain": "Social" },
+    "19": { "ja": "地球・惑星科学", "en": "Earth & Planetary Sciences", "domain": "Physical" },
+    "20": { "ja": "経済・金融", "en": "Economics, Econometrics & Finance", "domain": "Social" },
+    "21": { "ja": "エネルギー", "en": "Energy", "domain": "Physical" },
+    "22": { "ja": "工学", "en": "Engineering", "domain": "Physical" },
+    "23": { "ja": "環境科学", "en": "Environmental Science", "domain": "Physical" },
+    "24": { "ja": "免疫学・微生物学", "en": "Immunology & Microbiology", "domain": "Life" },
+    "25": { "ja": "材料科学", "en": "Materials Science", "domain": "Physical" },
+    "26": { "ja": "数学", "en": "Mathematics", "domain": "Physical" },
+    "27": { "ja": "医学", "en": "Medicine", "domain": "Health" },
+    "28": { "ja": "神経科学", "en": "Neuroscience", "domain": "Life" },
+    "29": { "ja": "看護学", "en": "Nursing", "domain": "Health" },
+    "30": { "ja": "薬学・毒性学", "en": "Pharmacology, Toxicology & Pharmaceutics", "domain": "Life" },
+    "31": { "ja": "物理学・天文学", "en": "Physics & Astronomy", "domain": "Physical" },
+    "32": { "ja": "心理学", "en": "Psychology", "domain": "Social" },
+    "33": { "ja": "社会科学", "en": "Social Sciences", "domain": "Social" },
+    "34": { "ja": "獣医学", "en": "Veterinary", "domain": "Health" },
+    "35": { "ja": "歯学", "en": "Dentistry", "domain": "Health" },
+    "36": { "ja": "医療専門職", "en": "Health Professions", "domain": "Health" }
+  },
+  "clusters": [
+    {
+      "id": "sky",
+      "icon": "🌌",
+      "label": { "ja": "宇宙と天文", "en": "Sky & Universe" },
+      "questions": [
+        { "id": "universe_size", "q": { "ja": "宇宙は、どこまで広がっているんだろう？", "en": "How far does the universe stretch?" }, "fields": ["31", "19"], "search": "cosmology universe expansion astrophysics" },
+        { "id": "blackhole", "q": { "ja": "ブラックホールの中は、どうなっているの？", "en": "What happens inside a black hole?" }, "fields": ["31"], "search": "black holes general relativity gravitation" },
+        { "id": "aliens", "q": { "ja": "宇宙のどこかに、生命はいるんだろうか？", "en": "Is there life somewhere out in space?" }, "fields": ["31", "13", "11"], "search": "astrobiology exoplanets origin of life" }
+      ]
+    },
+    {
+      "id": "life",
+      "icon": "🧬",
+      "label": { "ja": "生命と身体", "en": "Life & Body" },
+      "questions": [
+        { "id": "life_origin", "q": { "ja": "生き物は、どうやって生まれて変わってきたの？", "en": "How did living things begin and change?" }, "fields": ["13", "11"], "search": "evolution genetics molecular biology" },
+        { "id": "cancer", "q": { "ja": "がんは、なぜできて、どうすれば治せるの？", "en": "Why does cancer form, and can we cure it?" }, "fields": ["27", "13", "30"], "search": "cancer oncology tumor therapy" },
+        { "id": "brain", "q": { "ja": "脳は、どうやって考えたり感じたりしているの？", "en": "How does the brain think and feel?" }, "fields": ["28", "32"], "search": "neuroscience brain cognition" },
+        { "id": "germs", "q": { "ja": "ウイルスや細菌と、人の体はどう戦っているの？", "en": "How does the body fight viruses and bacteria?" }, "fields": ["24", "27"], "search": "immunology infectious disease microbiology" },
+        { "id": "medicine_design", "q": { "ja": "薬は、どうやって作られて効くの？", "en": "How are medicines made, and how do they work?" }, "fields": ["30", "16"], "search": "pharmacology drug discovery" },
+        { "id": "teeth", "q": { "ja": "歯や口の健康は、全身とどうつながっているの？", "en": "How is oral health linked to the whole body?" }, "fields": ["35", "27"], "search": "dentistry oral health" },
+        { "id": "animals_care", "q": { "ja": "動物のお医者さんは、何を診ているの？", "en": "What does an animal doctor actually treat?" }, "fields": ["34", "11"], "search": "veterinary animal health" },
+        { "id": "care", "q": { "ja": "人を支え、ケアするとは、どういうことだろう？", "en": "What does it mean to care for and support people?" }, "fields": ["29", "36"], "search": "nursing patient care health professions" }
+      ]
+    },
+    {
+      "id": "mind",
+      "icon": "💭",
+      "label": { "ja": "心と人間", "en": "Mind & People" },
+      "questions": [
+        { "id": "happiness", "q": { "ja": "「幸せ」って、いったい何だろう？", "en": "What is happiness, really?" }, "fields": ["32", "28"], "search": "well-being happiness psychology" },
+        { "id": "anxiety", "q": { "ja": "人は、どうして不安になったり立ち直れたりするの？", "en": "Why do we feel anxious — and how do we recover?" }, "fields": ["32", "27"], "search": "anxiety mental health resilience" },
+        { "id": "meaning", "q": { "ja": "言葉は、どうやって「意味」を持つの？", "en": "How do words come to mean something?" }, "fields": ["12", "33"], "search": "linguistics language meaning" }
+      ]
+    },
+    {
+      "id": "society",
+      "icon": "🏙️",
+      "label": { "ja": "社会と経済", "en": "Society & Money" },
+      "questions": [
+        { "id": "economy", "q": { "ja": "お金や経済は、どんな仕組みで動いているの？", "en": "What makes money and the economy move?" }, "fields": ["20", "14"], "search": "economics markets finance" },
+        { "id": "choose", "q": { "ja": "より良い「決め方・選び方」は、つくれるの？", "en": "Can we design better ways to decide?" }, "fields": ["18", "20"], "search": "decision science operations research" },
+        { "id": "together", "q": { "ja": "人と人は、どうやって社会をつくっているの？", "en": "How do people build a society together?" }, "fields": ["33", "12"], "search": "sociology social structure" }
+      ]
+    },
+    {
+      "id": "culture",
+      "icon": "🎭",
+      "label": { "ja": "言葉・文化・芸術", "en": "Words, Culture & Art" },
+      "questions": [
+        { "id": "history", "q": { "ja": "歴史や哲学は、今を生きる私たちに何を教えるの？", "en": "What can history and philosophy teach us now?" }, "fields": ["12"], "search": "history philosophy humanities" },
+        { "id": "art_move", "q": { "ja": "音楽や絵は、なぜ人の心を動かすの？", "en": "Why do music and art move us?" }, "fields": ["12", "32"], "search": "aesthetics music art perception" }
+      ]
+    },
+    {
+      "id": "earth",
+      "icon": "🌍",
+      "label": { "ja": "地球と自然", "en": "Earth & Nature" },
+      "questions": [
+        { "id": "climate", "q": { "ja": "地球の気候は、これからどうなっていくの？", "en": "What will happen to Earth's climate?" }, "fields": ["23", "19"], "search": "climate change environmental science" },
+        { "id": "quake", "q": { "ja": "火山や地震、海の底では何が起きているの？", "en": "What goes on inside volcanoes, quakes, and the deep sea?" }, "fields": ["19"], "search": "geophysics earthquakes oceanography" },
+        { "id": "food", "q": { "ja": "みんなの食べ物を、どう育てて守るの？", "en": "How do we grow and protect everyone's food?" }, "fields": ["11", "23"], "search": "agriculture crop science food security" }
+      ]
+    },
+    {
+      "id": "build",
+      "icon": "⚙️",
+      "label": { "ja": "ものづくりと技術", "en": "Make & Move" },
+      "questions": [
+        { "id": "robots", "q": { "ja": "ロボットや機械は、どこまで賢く動けるの？", "en": "How capable can robots and machines become?" }, "fields": ["22", "17"], "search": "robotics mechanical engineering control" },
+        { "id": "materials", "q": { "ja": "まだ無い「新しい素材」は、どう生まれるの？", "en": "How are brand-new materials invented?" }, "fields": ["25", "16", "15"], "search": "materials science nanomaterials" },
+        { "id": "energy", "q": { "ja": "未来のエネルギーは、何で動くの？", "en": "What will power the future?" }, "fields": ["21", "22"], "search": "renewable energy batteries solar" }
+      ]
+    },
+    {
+      "id": "logic",
+      "icon": "🔢",
+      "label": { "ja": "数・情報・物質", "en": "Numbers, Data & Matter" },
+      "questions": [
+        { "id": "ai", "q": { "ja": "AIやコンピュータは、どんな仕組みで「考える」の？", "en": "How do AI and computers actually 'think'?" }, "fields": ["17"], "search": "artificial intelligence machine learning" },
+        { "id": "math", "q": { "ja": "数の世界には、どんな不思議が隠れているの？", "en": "What wonders hide inside the world of numbers?" }, "fields": ["26"], "search": "mathematics number theory proof" },
+        { "id": "chemistry", "q": { "ja": "物質や分子の世界では、何が起きているの？", "en": "What's happening down at the level of molecules?" }, "fields": ["16", "15"], "search": "chemistry molecules reactions" }
+      ]
+    }
+  ]
+}
