@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "note": "入力の橋渡し(aliases)と出力の和訳(ja)を1ファイルに統合。fields=全26語ja/aliases完備。keywords=日本語/英字語→英語トピック語のピンポイント辞書(四半期キャッチー語の追加場所)。subfields=器(随時充填、空はfieldにフォールバック)。LEXICON_UNIFIED_SPEC.md準拠。",
+  "note": "入力の橋渡し(aliases)と出力の和訳(ja)を1ファイルに統合。fields=全26語ja/aliases完備。keywords=日本語/英字語→英語トピック語のピンポイント辞書(四半期キャッチー語の追加場所)。subfields=器(随時充填、空はfieldにフォールバック)。LEXICON_UNIFIED_SPEC.md準拠。 [v2: keywords/aliases大幅拡張(雑な入力対応)]",
   "generated": "2026-06-14",
   "fields": {
     "11": {
@@ -26,7 +26,19 @@
         "insect",
         "entomol",
         "nutrition",
-        "biolog"
+        "biolog",
+        "魚",
+        "鳥",
+        "犬",
+        "猫",
+        "ペット",
+        "サメ",
+        "恐竜",
+        "進化",
+        "絶滅",
+        "微生物",
+        "発酵",
+        "酒"
       ]
     },
     "12": {
@@ -52,7 +64,23 @@
         "aesthetic",
         "music",
         "cultur",
-        "humanities"
+        "humanities",
+        "方言",
+        "お笑い",
+        "笑い",
+        "映画",
+        "アニメ",
+        "漫画",
+        "小説",
+        "詩",
+        "演劇",
+        "ダンス",
+        "写真",
+        "宗教",
+        "神話",
+        "祭り",
+        "物語",
+        "デザイン"
       ]
     },
     "13": {
@@ -73,7 +101,10 @@
         "cell",
         "regenerat",
         "molecular biology",
-        "protein"
+        "protein",
+        "iPS",
+        "幹細胞",
+        "酵素"
       ]
     },
     "14": {
@@ -114,7 +145,10 @@
         "chemist",
         "molecul",
         "cataly",
-        "reaction"
+        "reaction",
+        "プラスチック",
+        "高分子",
+        "電池の化学"
       ]
     },
     "17": {
@@ -146,7 +180,18 @@
         "comput",
         "cryptograph",
         "data",
-        "algorithm"
+        "algorithm",
+        "ゲーム",
+        "アプリ",
+        "スマホ",
+        "SNS",
+        "VR",
+        "メタバース",
+        "ドローン",
+        "ブロックチェーン",
+        "仮想通貨",
+        "セキュリティ",
+        "自動運転"
       ]
     },
     "18": {
@@ -182,7 +227,13 @@
         "ocean",
         "marine",
         "geolog",
-        "geo"
+        "geo",
+        "恐竜",
+        "化石",
+        "津波",
+        "台風",
+        "天気",
+        "川"
       ]
     },
     "20": {
@@ -198,7 +249,11 @@
         "econom",
         "financ",
         "monetary",
-        "market"
+        "market",
+        "投資",
+        "株",
+        "景気",
+        "貿易"
       ]
     },
     "21": {
@@ -215,7 +270,11 @@
         "batter",
         "solar",
         "renewable",
-        "power"
+        "power",
+        "風力",
+        "水素",
+        "原子力",
+        "核融合"
       ]
     },
     "22": {
@@ -233,7 +292,15 @@
         "mechanical",
         "electrical",
         "architect",
-        "structural"
+        "structural",
+        "車",
+        "飛行機",
+        "新幹線",
+        "電車",
+        "橋",
+        "建物",
+        "ロボット",
+        "ドローン"
       ]
     },
     "23": {
@@ -252,7 +319,12 @@
         "ecolog",
         "biodivers",
         "pollution",
-        "sustainab"
+        "sustainab",
+        "ゴミ",
+        "リサイクル",
+        "プラスチック",
+        "公害",
+        "温暖化"
       ]
     },
     "24": {
@@ -270,7 +342,11 @@
         "immun",
         "infect",
         "bacteria",
-        "microbio"
+        "microbio",
+        "ワクチン",
+        "感染症",
+        "花粉症",
+        "アレルギー"
       ]
     },
     "25": {
@@ -286,7 +362,8 @@
         "material",
         "semiconductor",
         "metal",
-        "nano"
+        "nano",
+        "新素材"
       ]
     },
     "26": {
@@ -328,7 +405,18 @@
         "disease",
         "aging",
         "ageing",
-        "health"
+        "health",
+        "睡眠",
+        "心臓",
+        "血液",
+        "手術",
+        "耳",
+        "皮膚",
+        "骨",
+        "筋肉",
+        "糖尿病",
+        "肥満",
+        "痛み"
       ]
     },
     "28": {
@@ -344,7 +432,11 @@
         "brain",
         "neuro",
         "consciousness",
-        "cognit"
+        "cognit",
+        "睡眠",
+        "眠り",
+        "記憶",
+        "認知症"
       ]
     },
     "29": {
@@ -369,7 +461,8 @@
         "毒",
         "pharmac",
         "drug",
-        "toxicolog"
+        "toxicolog",
+        "ホルモン"
       ]
     },
     "31": {
@@ -400,7 +493,11 @@
         "quantum",
         "physic",
         "particle",
-        "gravit"
+        "gravit",
+        "核融合",
+        "宇宙人",
+        "ロケット",
+        "人工衛星"
       ]
     },
     "32": {
@@ -415,7 +512,19 @@
         "psycholog",
         "memory",
         "emotion",
-        "behavior"
+        "behavior",
+        "心",
+        "気持ち",
+        "幸福",
+        "幸せ",
+        "ストレス",
+        "不安",
+        "うつ",
+        "恋愛",
+        "人間関係",
+        "友達",
+        "いじめ",
+        "やる気"
       ]
     },
     "33": {
@@ -439,7 +548,24 @@
         "education",
         "geograph",
         "urban",
-        "gender"
+        "gender",
+        "少子化",
+        "高齢化",
+        "人口",
+        "格差",
+        "貧困",
+        "難民",
+        "移民",
+        "差別",
+        "戦争",
+        "平和",
+        "選挙",
+        "人権",
+        "福祉",
+        "介護",
+        "観光",
+        "まちづくり",
+        "SNS"
       ]
     },
     "34": {
@@ -476,7 +602,9 @@
         "rehabilitation",
         "physical therapy",
         "public health",
-        "health profession"
+        "health profession",
+        "介護",
+        "栄養"
       ]
     }
   },
@@ -673,7 +801,8 @@
     ],
     "食": [
       "food",
-      "agricultur"
+      "agricultur",
+      "nutrition"
     ],
     "食料": [
       "food security",
@@ -693,14 +822,20 @@
     ],
     "昆虫": [
       "insect",
-      "entomol"
+      "entomol",
+      "entomolog"
     ],
     "経済": [
-      "econom"
+      "econom",
+      "economic",
+      "macroeconomic",
+      "econometric"
     ],
     "金融": [
       "financ",
-      "econom"
+      "econom",
+      "monetary",
+      "banking"
     ],
     "お金": [
       "financ",
@@ -723,7 +858,11 @@
       "legal"
     ],
     "教育": [
-      "education"
+      "education",
+      "pedagog",
+      "curriculum",
+      "classroom",
+      "teaching"
     ],
     "言語": [
       "linguist",
@@ -751,7 +890,9 @@
       "music"
     ],
     "建築": [
-      "architect"
+      "architect",
+      "building design",
+      "urban design"
     ],
     "都市": [
       "urban",
@@ -763,6 +904,615 @@
     ],
     "文学": [
       "literature"
+    ],
+    "核融合": [
+      "fusion",
+      "plasma"
+    ],
+    "核分裂": [
+      "nuclear fission",
+      "reactor"
+    ],
+    "原子力": [
+      "nuclear"
+    ],
+    "量子コンピュータ": [
+      "quantum comput",
+      "quantum information"
+    ],
+    "重力": [
+      "gravit",
+      "relativity"
+    ],
+    "宇宙人": [
+      "astrobiolog",
+      "extraterrestrial",
+      "exoplanet"
+    ],
+    "宇宙飛行": [
+      "spaceflight",
+      "space mission"
+    ],
+    "ロケット": [
+      "rocket",
+      "propulsion",
+      "aerospace"
+    ],
+    "人工衛星": [
+      "satellite"
+    ],
+    "恐竜": [
+      "dinosaur",
+      "paleontolog"
+    ],
+    "化石": [
+      "fossil",
+      "paleontolog"
+    ],
+    "津波": [
+      "tsunami"
+    ],
+    "台風": [
+      "typhoon",
+      "cyclone",
+      "hurricane"
+    ],
+    "天気": [
+      "weather",
+      "meteorolog"
+    ],
+    "気象": [
+      "meteorolog",
+      "atmospheric"
+    ],
+    "睡眠": [
+      "sleep",
+      "circadian"
+    ],
+    "眠り": [
+      "sleep",
+      "circadian"
+    ],
+    "ストレス": [
+      "stress"
+    ],
+    "ワクチン": [
+      "vaccin",
+      "immuniz"
+    ],
+    "感染症": [
+      "infectious disease",
+      "epidemic"
+    ],
+    "細菌": [
+      "bacteria",
+      "microbial"
+    ],
+    "認知症": [
+      "dementia",
+      "alzheimer"
+    ],
+    "アルツハイマー": [
+      "alzheimer"
+    ],
+    "うつ": [
+      "depression",
+      "mood disorder"
+    ],
+    "うつ病": [
+      "depression"
+    ],
+    "不安": [
+      "anxiety"
+    ],
+    "自閉症": [
+      "autism"
+    ],
+    "発達障害": [
+      "neurodevelopmental",
+      "autism",
+      "adhd"
+    ],
+    "心臓": [
+      "cardiac",
+      "cardiovascular",
+      "heart"
+    ],
+    "血液": [
+      "blood",
+      "hematolog"
+    ],
+    "iPS": [
+      "stem cell",
+      "pluripotent"
+    ],
+    "幹細胞": [
+      "stem cell"
+    ],
+    "臓器": [
+      "organ transplant"
+    ],
+    "手術": [
+      "surger",
+      "operative"
+    ],
+    "視覚": [
+      "vision",
+      "visual percept"
+    ],
+    "耳": [
+      "hearing",
+      "auditory"
+    ],
+    "皮膚": [
+      "skin",
+      "dermatolog"
+    ],
+    "骨": [
+      "bone",
+      "orthopedic",
+      "skeletal"
+    ],
+    "筋肉": [
+      "muscle",
+      "muscular"
+    ],
+    "ホルモン": [
+      "hormone",
+      "endocrine"
+    ],
+    "妊娠": [
+      "pregnancy",
+      "obstetric"
+    ],
+    "出産": [
+      "childbirth",
+      "obstetric"
+    ],
+    "赤ちゃん": [
+      "infant",
+      "neonatal"
+    ],
+    "肥満": [
+      "obesity"
+    ],
+    "ダイエット": [
+      "obesity",
+      "weight",
+      "diet"
+    ],
+    "糖尿病": [
+      "diabetes"
+    ],
+    "アレルギー": [
+      "allerg"
+    ],
+    "花粉症": [
+      "allerg",
+      "pollen"
+    ],
+    "痛み": [
+      "pain",
+      "analgesi"
+    ],
+    "サメ": [
+      "shark",
+      "elasmobranch"
+    ],
+    "魚": [
+      "fish",
+      "fisheries",
+      "aquatic"
+    ],
+    "鳥": [
+      "bird",
+      "avian",
+      "ornitholog"
+    ],
+    "犬": [
+      "canine"
+    ],
+    "猫": [
+      "feline"
+    ],
+    "微生物": [
+      "microb",
+      "microorganism"
+    ],
+    "進化": [
+      "evolution",
+      "phylogen"
+    ],
+    "絶滅": [
+      "extinction",
+      "conservation"
+    ],
+    "ゲーム": [
+      "video game",
+      "gaming",
+      "gamification",
+      "game design"
+    ],
+    "アプリ": [
+      "application",
+      "mobile app",
+      "software"
+    ],
+    "スマホ": [
+      "smartphone",
+      "mobile"
+    ],
+    "SNS": [
+      "social media",
+      "social network"
+    ],
+    "sns": [
+      "social media",
+      "social network"
+    ],
+    "メタバース": [
+      "metaverse",
+      "virtual reality"
+    ],
+    "VR": [
+      "virtual reality",
+      "augmented reality"
+    ],
+    "vr": [
+      "virtual reality"
+    ],
+    "ドローン": [
+      "drone",
+      "unmanned aerial",
+      "uav"
+    ],
+    "3Dプリンタ": [
+      "3d printing",
+      "additive manufactur"
+    ],
+    "仮想通貨": [
+      "cryptocurrency",
+      "blockchain"
+    ],
+    "ブロックチェーン": [
+      "blockchain"
+    ],
+    "暗号通貨": [
+      "cryptocurrency",
+      "blockchain"
+    ],
+    "セキュリティ": [
+      "security",
+      "cybersecurity"
+    ],
+    "自動運転": [
+      "autonomous driving",
+      "self-driving",
+      "autonomous vehicle"
+    ],
+    "電気自動車": [
+      "electric vehicle",
+      "battery"
+    ],
+    "車": [
+      "automobile",
+      "vehicle",
+      "automotive"
+    ],
+    "飛行機": [
+      "aircraft",
+      "aerospace",
+      "aerodynamic"
+    ],
+    "新幹線": [
+      "railway",
+      "high-speed rail"
+    ],
+    "電車": [
+      "railway",
+      "rail transport"
+    ],
+    "橋": [
+      "bridge",
+      "structural engineering"
+    ],
+    "建物": [
+      "building",
+      "architecture",
+      "structural"
+    ],
+    "地震対策": [
+      "seismic",
+      "earthquake engineering"
+    ],
+    "太陽光": [
+      "solar",
+      "photovoltaic"
+    ],
+    "風力": [
+      "wind power",
+      "wind energy"
+    ],
+    "水素": [
+      "hydrogen",
+      "fuel cell"
+    ],
+    "リサイクル": [
+      "recycling",
+      "waste"
+    ],
+    "ゴミ": [
+      "waste",
+      "municipal solid waste"
+    ],
+    "プラスチック": [
+      "plastic",
+      "polymer"
+    ],
+    "幸福": [
+      "well-being",
+      "happiness",
+      "subjective well"
+    ],
+    "幸せ": [
+      "well-being",
+      "happiness"
+    ],
+    "少子化": [
+      "fertility",
+      "birth rate",
+      "population decline",
+      "demograph"
+    ],
+    "高齢化": [
+      "aging population",
+      "gerontolog",
+      "ageing"
+    ],
+    "人口": [
+      "population",
+      "demograph"
+    ],
+    "格差": [
+      "inequality",
+      "disparity"
+    ],
+    "貧困": [
+      "poverty"
+    ],
+    "難民": [
+      "refugee",
+      "migration"
+    ],
+    "移民": [
+      "migration",
+      "immigrant"
+    ],
+    "差別": [
+      "discrimination",
+      "prejudice"
+    ],
+    "ジェンダー": [
+      "gender",
+      "feminis"
+    ],
+    "ジェンダー平等": [
+      "gender equality"
+    ],
+    "いじめ": [
+      "bullying"
+    ],
+    "不登校": [
+      "school refusal",
+      "truancy"
+    ],
+    "子ども": [
+      "child development",
+      "childhood"
+    ],
+    "福祉": [
+      "welfare",
+      "social work"
+    ],
+    "介護": [
+      "caregiving",
+      "long-term care",
+      "nursing"
+    ],
+    "高齢者": [
+      "older adults",
+      "gerontolog",
+      "elderly"
+    ],
+    "心": [
+      "psycholog",
+      "mind",
+      "cognit"
+    ],
+    "気持ち": [
+      "emotion",
+      "affect"
+    ],
+    "感情": [
+      "emotion",
+      "affect"
+    ],
+    "恋愛": [
+      "romantic relationship",
+      "interpersonal attraction",
+      "close relationship"
+    ],
+    "人間関係": [
+      "interpersonal",
+      "relationship"
+    ],
+    "友達": [
+      "friendship",
+      "peer"
+    ],
+    "戦争": [
+      "warfare",
+      "armed conflict",
+      "military"
+    ],
+    "平和": [
+      "peace",
+      "conflict resolution"
+    ],
+    "選挙": [
+      "election",
+      "voting"
+    ],
+    "法律": [
+      "law",
+      "legal"
+    ],
+    "裁判": [
+      "judicial",
+      "court",
+      "law"
+    ],
+    "憲法": [
+      "constitutional law"
+    ],
+    "人権": [
+      "human rights"
+    ],
+    "投資": [
+      "investment",
+      "finance",
+      "asset pricing",
+      "portfolio",
+      "financial market",
+      "behavioral finance"
+    ],
+    "株": [
+      "stock market",
+      "equity",
+      "finance",
+      "asset pricing"
+    ],
+    "起業": [
+      "entrepreneur",
+      "startup"
+    ],
+    "観光": [
+      "tourism",
+      "hospitality"
+    ],
+    "地方創生": [
+      "regional revitalization",
+      "rural development"
+    ],
+    "まちづくり": [
+      "urban planning",
+      "community"
+    ],
+    "方言": [
+      "dialect",
+      "sociolinguist",
+      "dialectolog",
+      "sociolinguistic",
+      "language variation"
+    ],
+    "お笑い": [
+      "humor",
+      "comedy",
+      "laughter"
+    ],
+    "笑い": [
+      "humor",
+      "laughter"
+    ],
+    "映画": [
+      "cinema",
+      "motion picture",
+      "filmmaking",
+      "movie"
+    ],
+    "アニメ": [
+      "animation",
+      "anime"
+    ],
+    "漫画": [
+      "manga",
+      "comics"
+    ],
+    "小説": [
+      "literature",
+      "narrative",
+      "novel"
+    ],
+    "詩": [
+      "poetry",
+      "poetic"
+    ],
+    "演劇": [
+      "theatre",
+      "drama",
+      "performance"
+    ],
+    "ダンス": [
+      "dance",
+      "choreograph"
+    ],
+    "デザイン": [
+      "design"
+    ],
+    "ファッション": [
+      "fashion",
+      "textile",
+      "apparel"
+    ],
+    "写真": [
+      "photograph"
+    ],
+    "宗教": [
+      "religion",
+      "religious"
+    ],
+    "神話": [
+      "mythology",
+      "folklore"
+    ],
+    "祭り": [
+      "festival",
+      "ritual"
+    ],
+    "料理": [
+      "culinary",
+      "food science",
+      "gastronom"
+    ],
+    "酒": [
+      "fermentation",
+      "alcohol",
+      "brewing"
+    ],
+    "スポーツ": [
+      "sport",
+      "exercise",
+      "athletic"
+    ],
+    "運動": [
+      "exercise",
+      "physical activity",
+      "motor"
+    ],
+    "筋トレ": [
+      "resistance training",
+      "muscle"
+    ],
+    "ソフトウェア": [
+      "software"
+    ],
+    "ハードウェア": [
+      "hardware",
+      "computer architecture"
+    ],
+    "データサイエンス": [
+      "data science",
+      "data analy"
     ]
   },
   "subfields": {}
