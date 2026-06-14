@@ -26,6 +26,12 @@
   .lang button{border:0;background:transparent;color:var(--ink-soft);padding:7px 13px;cursor:pointer}
   .lang button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
 
+  .growth{margin:0 0 20px;padding:13px 16px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,rgba(44,122,107,.06),rgba(44,122,107,.02))}
+  .growth .nums{display:flex;flex-wrap:wrap;gap:18px}
+  .growth .n{font-family:"Space Mono",monospace}
+  .growth .n b{font-size:19px;color:var(--teal);font-weight:700}
+  .growth .n span{font-size:12px;color:var(--ink-soft);margin-left:5px}
+  .growth .msg{margin-top:8px;font-size:12.5px;color:var(--ink-soft)}
   .tabs{display:flex;gap:8px;margin-bottom:26px}
   .tabs button{flex:1;border:1.5px solid var(--line);background:var(--card);color:var(--ink-soft);
     border-radius:13px;padding:13px;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit}
@@ -100,6 +106,8 @@
     </div>
   </header>
 
+  <div id="growth" class="growth" hidden></div>
+
   <div class="tabs" role="tablist">
     <button id="t-k" role="tab" aria-selected="true" data-i="tab_k"></button>
     <button id="t-q" role="tab" aria-selected="false" data-i="tab_q"></button>
@@ -156,6 +164,7 @@ const T={
     count:"人", more:"もっと見る", back:"← 問いにもどる",
     qnote:"この問いとつながる分野の研究者を、活動量の多い順に表示しています。", inthis:"の研究者",
     works:"論文", cited:"被引用", h:"h指数", profile:"OpenAlex", dig:"この先生を深掘り",
+    gschool:"学校", gpref:"都道府県", gppl:"人の研究者", grow_t:"育ち続ける地図", gmsg:"きみの検索が、次の誰かの探索の道しるべになる。",
     foot:"データ: OpenAlex（CC0・全世界）"},
   en:{eyebrow:"Curiosity is your greatest talent", title:"From your “why” to a mentor",
     sub:"Search a word that moves you and meet a researcher in Japan exploring it right now. Tap a name to dig deeper into their world — your curiosity grows this map.",
@@ -171,6 +180,7 @@ const T={
     count:"", more:"Show more", back:"← Back to questions",
     qnote:"Researchers in fields connected to this question, sorted by research activity.", inthis:"researchers",
     works:"works", cited:"cited", h:"h-index", profile:"OpenAlex", dig:"Dig deeper",
+    gschool:"schools", gpref:"prefectures", gppl:"researchers", grow_t:"A map that keeps growing", gmsg:"your search becomes a signpost for the next explorer.",
     foot:"Data: OpenAlex (CC0 · global)"}
 };
 let lang="ja", SITE=null, QDATA=null, LEX=null, IDATA=null, SUM={};
@@ -207,6 +217,7 @@ function loadSite(){
   sitePromise=(async()=>{
     try{ SITE=await (await fetch("./data/site_data.json")).json(); }catch(e){ SITE=SAMPLE_SITE; }
     siteReady=true;
+    renderGrowth();   // 研究者数が確定したので成長メーターを更新
   })();
   return sitePromise;
 }
@@ -223,6 +234,22 @@ function fieldLabels(r){
   (r.fields||[]).forEach(f=>{ const j=fieldJa(String(f)); if(j&&!seen.has(j)){ seen.add(j); out.push(j); } });
   return out.slice(0,3);
 }
+// 成長メーター: 学校・都道府県は institutions.json から即時、研究者数は site_data 読込後に確定。
+function renderGrowth(){
+  const el=document.getElementById("growth"); if(!el) return;
+  const list=Array.isArray(IDATA)?IDATA:((IDATA&&IDATA.institutions)||[]);
+  const schools=new Set(), prefs=new Set();
+  list.forEach(i=>{ const en=i.resolved_name||i.name||i.name_en; if(en) schools.add(en); if(i.prefecture) prefs.add(i.prefecture); });
+  if(!schools.size){ el.hidden=true; return; }
+  const rows=siteReady?(Array.isArray(SITE)?SITE:((SITE&&SITE.researchers)||[])):null;
+  const ppl=rows?rows.length.toLocaleString():"…";
+  el.hidden=false;
+  el.innerHTML=`<div class="nums">
+    <span class="n"><b>${schools.size.toLocaleString()}</b><span>${T[lang].gschool}</span></span>
+    <span class="n"><b>${prefs.size}</b><span>${T[lang].gpref}</span></span>
+    <span class="n"><b>${ppl}</b><span>${T[lang].gppl}</span></span>
+  </div><div class="msg">🌱 ${T[lang].grow_t} — ${T[lang].gmsg}</div>`;
+}
 
 function applyLang(){
   document.body.dataset.lang=lang; document.documentElement.lang=lang;
@@ -231,6 +258,7 @@ function applyLang(){
   document.getElementById("kq").placeholder=T[lang].khint;
   document.querySelectorAll(".lang button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.set===lang));
   renderTree();
+  renderGrowth();
 }
 document.querySelectorAll(".lang button").forEach(b=>b.onclick=()=>{lang=b.dataset.set;applyLang();});
 
