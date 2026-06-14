@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "note": "入力の橋渡し(aliases)と出力の和訳(ja)を1ファイルに統合。fieldsは全26語ja/aliases完備。subfieldsは器(随時充填、空はfieldにフォールバック)。LEXICON_UNIFIED_SPEC.md準拠。",
+  "note": "入力の橋渡し(aliases)と出力の和訳(ja)を1ファイルに統合。fields=全26語ja/aliases完備。keywords=日本語/英字語→英語トピック語のピンポイント辞書(四半期キャッチー語の追加場所)。subfields=器(随時充填、空はfieldにフォールバック)。LEXICON_UNIFIED_SPEC.md準拠。",
   "generated": "2026-06-14",
   "fields": {
     "11": {
@@ -479,6 +479,291 @@
         "health profession"
       ]
     }
+  },
+  "keywords": {
+    "宇宙": [
+      "cosmolog",
+      "astrophys",
+      "astronom",
+      "univers",
+      "galax"
+    ],
+    "うちゅう": [
+      "cosmolog",
+      "astrophys",
+      "astronom"
+    ],
+    "ブラックホール": [
+      "black hole"
+    ],
+    "星": [
+      "star",
+      "stellar"
+    ],
+    "惑星": [
+      "planet"
+    ],
+    "量子": [
+      "quantum"
+    ],
+    "物理": [
+      "physic"
+    ],
+    "数学": [
+      "mathemat"
+    ],
+    "統計": [
+      "statistic"
+    ],
+    "ai": [
+      "artificial intelligence",
+      "machine learning",
+      "neural",
+      "deep learning"
+    ],
+    "人工知能": [
+      "artificial intelligence",
+      "machine learning",
+      "neural"
+    ],
+    "機械学習": [
+      "machine learning",
+      "neural"
+    ],
+    "ロボット": [
+      "robot"
+    ],
+    "プログラ": [
+      "software",
+      "programming",
+      "computation"
+    ],
+    "情報": [
+      "information",
+      "comput"
+    ],
+    "コンピュータ": [
+      "comput"
+    ],
+    "暗号": [
+      "cryptograph"
+    ],
+    "データ": [
+      "data"
+    ],
+    "脳": [
+      "brain",
+      "neuro"
+    ],
+    "神経": [
+      "neuro"
+    ],
+    "心理": [
+      "psycholog"
+    ],
+    "記憶": [
+      "memory"
+    ],
+    "意識": [
+      "consciousness",
+      "cognit"
+    ],
+    "遺伝": [
+      "gene",
+      "genetic",
+      "genom"
+    ],
+    "遺伝子": [
+      "gene",
+      "genetic",
+      "genom"
+    ],
+    "細胞": [
+      "cell"
+    ],
+    "再生医療": [
+      "regenerat"
+    ],
+    "がん": [
+      "cancer",
+      "oncolog",
+      "tumor"
+    ],
+    "癌": [
+      "cancer",
+      "oncolog",
+      "tumor"
+    ],
+    "ウイルス": [
+      "virus",
+      "viral"
+    ],
+    "免疫": [
+      "immun"
+    ],
+    "感染": [
+      "infect"
+    ],
+    "薬": [
+      "pharmac",
+      "drug"
+    ],
+    "医療": [
+      "medic",
+      "clinical"
+    ],
+    "医学": [
+      "medic",
+      "clinical"
+    ],
+    "老化": [
+      "aging",
+      "ageing",
+      "senescen"
+    ],
+    "健康": [
+      "health"
+    ],
+    "栄養": [
+      "nutrition"
+    ],
+    "気候": [
+      "climate"
+    ],
+    "気候変動": [
+      "climate"
+    ],
+    "環境": [
+      "environment",
+      "ecolog"
+    ],
+    "地震": [
+      "earthquake",
+      "seismic"
+    ],
+    "火山": [
+      "volcan"
+    ],
+    "海": [
+      "ocean",
+      "marine"
+    ],
+    "海洋": [
+      "ocean",
+      "marine"
+    ],
+    "生態": [
+      "ecolog",
+      "biodivers"
+    ],
+    "エネルギー": [
+      "energy"
+    ],
+    "電池": [
+      "batter"
+    ],
+    "材料": [
+      "material"
+    ],
+    "半導体": [
+      "semiconductor"
+    ],
+    "化学": [
+      "chemist"
+    ],
+    "食": [
+      "food",
+      "agricultur"
+    ],
+    "食料": [
+      "food security",
+      "agricultur"
+    ],
+    "農業": [
+      "agricultur"
+    ],
+    "植物": [
+      "plant",
+      "botan"
+    ],
+    "動物": [
+      "animal",
+      "zoolog",
+      "veterinar"
+    ],
+    "昆虫": [
+      "insect",
+      "entomol"
+    ],
+    "経済": [
+      "econom"
+    ],
+    "金融": [
+      "financ",
+      "econom"
+    ],
+    "お金": [
+      "financ",
+      "monetary",
+      "econom"
+    ],
+    "経営": [
+      "management",
+      "business"
+    ],
+    "社会": [
+      "social",
+      "sociolog"
+    ],
+    "政治": [
+      "politic"
+    ],
+    "法": [
+      "law",
+      "legal"
+    ],
+    "教育": [
+      "education"
+    ],
+    "言語": [
+      "linguist",
+      "language"
+    ],
+    "言葉": [
+      "linguist",
+      "language"
+    ],
+    "歴史": [
+      "histor"
+    ],
+    "哲学": [
+      "philosoph"
+    ],
+    "芸術": [
+      "art",
+      "aesthetic"
+    ],
+    "美術": [
+      "art",
+      "aesthetic"
+    ],
+    "音楽": [
+      "music"
+    ],
+    "建築": [
+      "architect"
+    ],
+    "都市": [
+      "urban",
+      "city",
+      "cities"
+    ],
+    "地理": [
+      "geograph"
+    ],
+    "文学": [
+      "literature"
+    ]
   },
   "subfields": {}
 }

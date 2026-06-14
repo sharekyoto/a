@@ -73,6 +73,7 @@
   .stats b{display:block;font-size:15px;color:var(--ink);font-weight:700}
   .topics{margin-top:13px;display:flex;flex-wrap:wrap;gap:7px}
   .chip{font-size:12.5px;background:rgba(44,122,107,.09);color:var(--teal);border:1px solid rgba(44,122,107,.22);border-radius:999px;padding:4px 11px}
+  .subtopics{margin-top:8px;font-size:11.5px;color:#9AA0AE;font-family:"Space Mono",monospace;line-height:1.5}
   .links{margin-top:13px;display:flex;gap:14px;font-size:13px;font-family:"Space Mono",monospace}
   .links a{color:var(--coral);text-decoration:none} .links a:hover{text-decoration:underline}
   .more{display:block;margin:8px auto 0;border:1.5px solid var(--ink);background:transparent;color:var(--ink);border-radius:14px;padding:12px 28px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit}
@@ -170,7 +171,7 @@ const T={
     works:"works", cited:"cited", h:"h-index", profile:"OpenAlex",
     foot:"Data: OpenAlex (CC0 · global)"}
 };
-let lang="ja", SITE=null, QDATA=null;
+let lang="ja", SITE=null, QDATA=null, LEX=null;
 
 /* ---- fallback sample so the page renders before the pipeline runs ---- */
 const SAMPLE_QUESTIONS={clusters:[
@@ -197,6 +198,15 @@ async function getJSON(url){
 async function loadData(){
   try{ QDATA=await (await fetch("./data/questions.json")).json(); }catch(e){ QDATA=SAMPLE_QUESTIONS; }
   try{ SITE=await (await fetch("./data/site_data.json")).json(); }catch(e){ SITE=SAMPLE_SITE; }
+  try{ LEX=await (await fetch("./data/lexicon.json")).json(); }catch(e){ LEX={fields:{},subfields:{}}; }
+}
+/* ---- lexicon helpers (output: 和訳 / input: 橋渡し) ---- */
+function fieldJa(fid){ const e=LEX&&LEX.fields&&LEX.fields[fid]; return e?(e.ja||e.en):fid; }
+// 研究者の field id 群 → 日本語の分野ラベル配列(重複除去・最大3)
+function fieldLabels(r){
+  const seen=new Set(), out=[];
+  (r.fields||[]).forEach(f=>{ const j=fieldJa(String(f)); if(j&&!seen.has(j)){ seen.add(j); out.push(j); } });
+  return out.slice(0,3);
 }
 
 function applyLang(){
@@ -279,7 +289,10 @@ function card(r,fromSite){
   const oid=r.id.replace("https://openalex.org/","");
   const name=r.name, inst=r.inst||r.inst_name||"", cc=r.country;
   const works=r.works??r.works_count??0, cited=r.cited??r.cited_by_count??0, h=r.h??r.h_index??"–";
-  const topics=(r.topics||[]).slice(0,4).map(t=>`<span class="chip">${typeof t==="string"?t:t.display_name}</span>`).join("");
+  // 主: 日本語の分野チップ(field.ja) / 補助: 英語の具体トピックを薄く併記
+  const fieldChips=fieldLabels(r).map(j=>`<span class="chip">${j}</span>`).join("");
+  const subTopics=(r.topics||[]).slice(0,3)
+    .map(t=>typeof t==="string"?t:(t&&t.display_name)||"").filter(Boolean).join(" · ");
   const orcid=r.orcid?`<a href="${r.orcid}" target="_blank" rel="noopener">ORCID ↗</a>`:"";
   c.innerHTML=`
     <div class="top">
@@ -291,7 +304,8 @@ function card(r,fromSite){
         <span><b>${h}</b>${T[lang].h}</span>
       </div>
     </div>
-    <div class="topics">${topics}</div>
+    <div class="topics">${fieldChips}</div>
+    ${subTopics?`<div class="subtopics">${subTopics}</div>`:""}
     <div class="links"><a href="https://openalex.org/${oid}" target="_blank" rel="noopener">${T[lang].profile} ↗</a>${orcid}</div>`;
   return c;
 }
@@ -347,49 +361,57 @@ function renderSMore(){
 document.getElementById("go").onclick=()=>{const q=document.getElementById("q").value.trim();if(q)searchSchool(q);};
 document.getElementById("q").addEventListener("keydown",e=>{if(e.key==="Enter"){const q=e.target.value.trim();if(q)searchSchool(q);}});
 
-/* ---- keyword → topic match (client-side, no live API, no key) ---- */
-const SYN={
-  "宇宙":["cosmolog","astrophys","astronom","univers","galax"],"うちゅう":["cosmolog","astrophys","astronom"],
-  "ブラックホール":["black hole"],"星":["star","stellar"],"惑星":["planet"],
-  "量子":["quantum"],"物理":["physic"],"数学":["mathemat"],"統計":["statistic"],
-  "ai":["artificial intelligence","machine learning","neural","deep learning"],
-  "人工知能":["artificial intelligence","machine learning","neural"],"機械学習":["machine learning","neural"],
-  "ロボット":["robot"],"プログラ":["software","programming","computation"],"情報":["information","comput"],
-  "コンピュータ":["comput"],"暗号":["cryptograph"],"データ":["data"],
-  "脳":["brain","neuro"],"神経":["neuro"],"心理":["psycholog"],"記憶":["memory"],"意識":["consciousness","cognit"],
-  "遺伝":["gene","genetic","genom"],"遺伝子":["gene","genetic","genom"],"細胞":["cell"],"再生医療":["regenerat"],
-  "がん":["cancer","oncolog","tumor"],"癌":["cancer","oncolog","tumor"],"ウイルス":["virus","viral"],"免疫":["immun"],
-  "感染":["infect"],"薬":["pharmac","drug"],"医療":["medic","clinical"],"医学":["medic","clinical"],
-  "老化":["aging","ageing","senescen"],"健康":["health"],"栄養":["nutrition"],
-  "気候":["climate"],"気候変動":["climate"],"環境":["environment","ecolog"],"地震":["earthquake","seismic"],
-  "火山":["volcan"],"海":["ocean","marine"],"海洋":["ocean","marine"],"生態":["ecolog","biodivers"],
-  "エネルギー":["energy"],"電池":["batter"],"材料":["material"],"半導体":["semiconductor"],"化学":["chemist"],
-  "食":["food","agricultur"],"食料":["food security","agricultur"],"農業":["agricultur"],"植物":["plant","botan"],
-  "動物":["animal","zoolog","veterinar"],"昆虫":["insect","entomol"],
-  "経済":["econom"],"金融":["financ","econom"],"お金":["financ","monetary","econom"],"経営":["management","business"],
-  "社会":["social","sociolog"],"政治":["politic"],"法":["law","legal"],"教育":["education"],
-  "言語":["linguist","language"],"言葉":["linguist","language"],"歴史":["histor"],"哲学":["philosoph"],
-  "芸術":["art","aesthetic"],"美術":["art","aesthetic"],"音楽":["music"],"建築":["architect"],
-  "都市":["urban","city","cities"],"地理":["geograph"],"文学":["literature"]
-};
-function kwTerms(query){
-  const q=query.toLowerCase().trim();
-  const terms=new Set();
-  if(/[a-z]/.test(q)) terms.add(q);
-  for(const key in SYN){ if(q.includes(key)) SYN[key].forEach(t=>terms.add(t)); }
-  return [...terms];
+/* ---- keyword → field/subfield resolve (client-side, no live API, no key) ----
+   lexicon.json の aliases/ja/en を走査して field/subfield ID を特定。
+   短い英字クエリ(<=3)は単語境界を要求して "ai"→"brain" 等の誤爆を防ぐ。 */
+function lexMatch(q, e){
+  const ascii=/^[a-z0-9]+$/.test(q);
+  const hay=[e.ja,e.en,...(e.aliases||[])].filter(Boolean).map(s=>String(s).toLowerCase());
+  for(const h of hay){
+    if(h===q) return true;
+    if(q.length>=2 && h.includes(q)){
+      if(ascii && q.length<=3){ if(new RegExp("\\b"+q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).test(h)) return true; }
+      else return true;
+    }
+    if(h.length>=2 && q.includes(h)) return true;
+  }
+  return false;
+}
+// 入力 → {ids:Set<field id>, terms:[topics文字列のピンポイント照合語]}
+//  ids   = field 一致(分野で広く拾う)
+//  terms = ピンポイント照合語。keywords辞書(日本語/英字→英語トピック語)＋長い英字入力。
+//          四半期キャッチー語は lexicon.json の keywords に1行足すだけで検索可能になる。
+function kwHit(q, key){
+  const k=key.toLowerCase();
+  if(/^[a-z0-9]+$/.test(k) && k.length<=3) return new RegExp("\\b"+k.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).test(q); // 短い英字は語境界
+  return q.includes(k) || (k.length>=2 && q.includes(k));
+}
+function resolveQuery(input){
+  const q=input.trim().toLowerCase();
+  const ids=new Set(), terms=new Set();
+  if(/^[a-z0-9 ]+$/.test(q) && q.length>=4) terms.add(q);          // 英語キーワードはそのまま具体トピック照合
+  const kw=(LEX&&LEX.keywords)||{};
+  for(const key in kw){ if(kwHit(q,key)) (kw[key]||[]).forEach(t=>terms.add(String(t).toLowerCase())); }
+  const fields=(LEX&&LEX.fields)||{};
+  for(const fid in fields){ if(lexMatch(q,fields[fid])) ids.add(fid); }
+  return {ids, terms:[...terms]};
 }
 function kwAll(){ return Array.isArray(SITE)?SITE:((SITE&&SITE.researchers)||[]); }
 let kShown=0, kMatched=[];
 function kwNote(msg){ const out=document.getElementById("kresults"); out.innerHTML="";
   const p=document.createElement("p"); p.className="status err"; p.textContent=msg; out.appendChild(p); }
 function kwSearch(query){
-  const terms=kwTerms(query);
+  const {ids,terms}=resolveQuery(query);
   const out=document.getElementById("kresults"); out.innerHTML="";
-  if(!terms.length){ kwNote(T[lang].knone); return; }
+  if(!ids.size && !terms.length){ kwNote(T[lang].knone); return; }
+  // ハイブリッド: field 一致で広く拾い、topics 文字列一致でピンポイント加点
   kMatched=kwAll().map(r=>{
-    const tops=(r.topics||[]).map(t=>(typeof t==="string"?t:(t.display_name||"")).toLowerCase());
-    let score=0; terms.forEach(term=>{ if(tops.some(tp=>tp.includes(term))) score++; });
+    let score=0;
+    if(ids.size && (r.fields||[]).some(f=>ids.has(String(f)))) score+=1;
+    if(terms.length){
+      const tops=(r.topics||[]).map(t=>(typeof t==="string"?t:(t.display_name||"")).toLowerCase());
+      terms.forEach(term=>{ if(tops.some(tp=>tp.includes(term))) score+=2; });
+    }
     return {r,score};
   }).filter(x=>x.score>0)
     .sort((a,b)=> b.score-a.score || (b.r.cited||b.r.cited_by_count||0)-(a.r.cited||a.r.cited_by_count||0))
