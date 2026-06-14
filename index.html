@@ -174,12 +174,12 @@
 const T={
   ja:{eyebrow:"好奇心は、いちばんの才能だ", title:"きみの「なぜ」から、師匠を探す",
     sub:"心が動いた言葉で検索してみよう。それを“今まさに”研究している日本の先生に出会える。名前を押せば、その人の世界をもっと深く掘りにいける。きみの探究が、この地図を育てていく。",
-    tab_q:"問いから探す", tab_s:"学校から探す", tab_k:"キーワードで探す",
+    tab_q:"問いから探す", tab_s:"学校・研究者名", tab_k:"キーワードで探す",
     kgo:"探す", khint:"気になる言葉（例:再生医療、ブラックホール、AI）",
     khint2:"気になる言葉を入れると、それを研究している先生が活動量順に出ます。言葉が浮かばないときは「問いから探す」へ。",
     knone:"その言葉に近い先生はまだ見つかりませんでした。別の言い方や「問いから探す」も試してみてください。",
     kcount:"人の先生",
-    go:"探す", hint:"例:京都大学 / 東北大学 / 早稲田大学 / 看護",
+    go:"探す", hint:"例:京都大学 / 看護 / 山中伸弥 / Yamanaka",
     pick:"どの学校ですか?", searching:"学校をさがしています…", loading:"よみこんでいます…",
     none:"見つかりませんでした。英語名でも試してみてください。", nores:"この学校の研究者はまだ見つかりませんでした。",
     err:"うまく接続できませんでした。少し待ってもう一度。",
@@ -191,12 +191,12 @@ const T={
     foot:"データ: OpenAlex（CC0・全世界）"},
   en:{eyebrow:"Curiosity is your greatest talent", title:"From your “why” to a mentor",
     sub:"Search a word that moves you and meet a researcher in Japan exploring it right now. Tap a name to dig deeper into their world — your curiosity grows this map.",
-    tab_q:"By question", tab_s:"By school", tab_k:"By keyword",
+    tab_q:"By question", tab_s:"School / name", tab_k:"By keyword",
     kgo:"Search", khint:"a word you're curious about (e.g. regenerative medicine, black holes, AI)",
     khint2:"Type a word and meet researchers working on it, sorted by activity. Not sure what to type? Try 'By question'.",
     knone:"No close match yet. Try another wording, or 'By question'.",
     kcount:"researchers",
-    go:"Search", hint:"e.g. Kyoto University / Tohoku University / Waseda / nursing",
+    go:"Search", hint:"e.g. Kyoto University / nursing / Yamanaka / Tanaka",
     pick:"Which one?", searching:"Looking up the school…", loading:"Loading…",
     none:"No match. Try the English name.", nores:"No researchers found for this school yet.",
     err:"Couldn't connect. Try again in a moment.",
@@ -436,16 +436,36 @@ function searchSchool(query){
     const ja=x.ja.toLowerCase(), en=x.en.toLowerCase();
     return ja.includes(q)||en.includes(q)||(q.length>=2&&q.includes(en));
   }).sort((a,b)=>b.people.length-a.people.length);
-  if(!hits.length){ $sr.innerHTML=comebackBlock(query); return; }
-  if(hits.length===1){ loadSchool(hits[0]); return; }
-  hits.slice(0,8).forEach(x=>{
-    const b=document.createElement("button"); b.className="inst";
-    const nm=lang==="ja"?(x.ja||x.en):x.en;
-    b.innerHTML=`<span class="flag">${flag(x.country)}</span><span><span class="nm">${nm}</span><br>
-      <span class="meta">${x.pref?x.pref+" · ":""}${x.people.length.toLocaleString()} ${lang==="ja"?"名":"researchers"}</span></span>`;
-    b.onclick=()=>{ $pick.innerHTML=""; loadSchool(x); };
-    $pick.appendChild(b);
-  });
+  // 研究者名でも検索(追加APIなし・ロード済み site_data のメモリ内フィルタ)
+  const rows=Array.isArray(SITE)?SITE:((SITE&&SITE.researchers)||[]);
+  const nameHits = q.length>=2 ? rows.filter(r=>(r.name||"").toLowerCase().includes(q))
+    .sort((a,b)=>(b.cited||0)-(a.cited||0)) : [];
+  if(!hits.length && !nameHits.length){ $sr.innerHTML=comebackBlock(query); return; }
+  if(hits.length===1 && !nameHits.length){ loadSchool(hits[0]); return; }
+  // 学校候補(ボタン)
+  if(hits.length){
+    const lbl=document.createElement("p"); lbl.className="note";
+    lbl.textContent=lang==="ja"?"学校で探す":"By school"; $pick.appendChild(lbl);
+    hits.slice(0,8).forEach(x=>{
+      const b=document.createElement("button"); b.className="inst";
+      const nm=lang==="ja"?(x.ja||x.en):x.en;
+      b.innerHTML=`<span class="flag">${flag(x.country)}</span><span><span class="nm">${nm}</span><br>
+        <span class="meta">${x.pref?x.pref+" · ":""}${x.people.length.toLocaleString()} ${lang==="ja"?"名":"researchers"}</span></span>`;
+      b.onclick=()=>{ $pick.innerHTML=""; loadSchool(x); };
+      $pick.appendChild(b);
+    });
+  }
+  // 研究者名ヒット(カード)
+  if(nameHits.length){
+    const head=document.createElement("div"); head.className="head";
+    head.innerHTML=`<h2>${lang==="ja"?`「${query}」に名前が一致する研究者`:`Researchers named “${query}”`}</h2>`+
+      `<span class="count">${nameHits.length.toLocaleString()} ${lang==="ja"?"名":"researchers"}</span>`;
+    $sr.appendChild(head);
+    const box=document.createElement("div"); $sr.appendChild(box);
+    nameHits.slice(0,20).forEach(r=>box.appendChild(card(r,true)));
+    if(nameHits.length>20){ const p=document.createElement("p"); p.className="growfoot";
+      p.textContent=lang==="ja"?`ほかにも ${(nameHits.length-20).toLocaleString()} 名`:`+${nameHits.length-20} more`; $sr.appendChild(p); }
+  }
 }
 let sList=[], sShown=0, sInst=null;
 function loadSchool(x){
