@@ -79,6 +79,10 @@
   .head .count{font-family:"Space Mono",monospace;font-size:12px;color:var(--ink-soft)}
   .note{color:var(--ink-soft);font-size:12.5px;margin:3px 0 20px;max-width:62ch}
   .status{margin-top:22px;color:var(--ink-soft);font-size:14px} .status.err{color:var(--coral)}
+  .comeback{margin-top:20px;padding:18px 20px;border:1px solid rgba(232,100,60,.3);background:rgba(232,100,60,.06);border-radius:16px}
+  .comeback b{display:block;font-family:"Fraunces",serif;font-size:17px;color:var(--ink);margin-bottom:6px}
+  .comeback div{font-size:13.5px;color:var(--ink-soft);line-height:1.75}
+  .growfoot{margin-top:16px;text-align:center;font-size:12px;color:var(--ink-soft);font-family:"Space Mono",monospace}
 
   .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:19px 21px;margin-bottom:13px;box-shadow:var(--shadow)}
   .card .top{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
@@ -183,6 +187,7 @@ const T={
     qnote:"この問いとつながる分野の研究者を、活動量の多い順に表示しています。", inthis:"の研究者",
     works:"論文", cited:"被引用", h:"h指数", profile:"OpenAlex", dig:"この先生を深掘り",
     gcountry:"カ国", gschool:"学校", gpref:"都道府県", gppl:"人の研究者", grow_t:"育ち続ける地図", gmsg:"きみの検索が、次の誰かの探索の道しるべになる。", aboutlink:"このサイトについて ▸",
+    cbT:"「{q}」のまわりは、まだ育ち途中。", cbB:"この地図は毎晩少しずつ大きくなっています。次の更新まで約{H}時間。そのころにまた、会いに来てね。🌱", growFoot:"🌱 この地図は毎晩育っています。次の更新まで約{H}時間。",
     foot:"データ: OpenAlex（CC0・全世界）"},
   en:{eyebrow:"Curiosity is your greatest talent", title:"From your “why” to a mentor",
     sub:"Search a word that moves you and meet a researcher in Japan exploring it right now. Tap a name to dig deeper into their world — your curiosity grows this map.",
@@ -199,6 +204,7 @@ const T={
     qnote:"Researchers in fields connected to this question, sorted by research activity.", inthis:"researchers",
     works:"works", cited:"cited", h:"h-index", profile:"OpenAlex", dig:"Dig deeper",
     gcountry:"countries", gschool:"schools", gpref:"prefectures", gppl:"researchers", grow_t:"A map that keeps growing", gmsg:"your search becomes a signpost for the next explorer.", aboutlink:"About ▸",
+    cbT:"“{q}” is still growing here.", cbB:"This map gets a little bigger every night. Next update in about {H}h — come back and see then. 🌱", growFoot:"🌱 Growing every night. Next update in about {H}h.",
     foot:"Data: OpenAlex (CC0 · global)"}
 };
 let lang="ja", SITE=null, QDATA=null, LEX=null, IDATA=null, SUM={};
@@ -345,6 +351,26 @@ function moreQ(){
   }
 }
 
+// Phase2: 検索語を無料Googleフォームに記録(鍵不要)。URL/フィールド未設定なら何もしない。
+// 設定後、夜間ジョブが「探された言葉/大学」を優先して充実させる。
+const SEARCH_LOG_URL="";    // 例: https://docs.google.com/forms/d/e/XXXX/formResponse
+const SEARCH_LOG_FIELD="";  // 例: entry.1234567890
+function logSearch(q,type){
+  if(!SEARCH_LOG_URL||!SEARCH_LOG_FIELD||!q) return;
+  try{ const b=new URLSearchParams(); b.append(SEARCH_LOG_FIELD,(type||"")+":"+q);
+    fetch(SEARCH_LOG_URL,{method:"POST",mode:"no-cors",body:b}); }catch(e){}
+}
+// 次の夜間更新(18:00 UTC = 03:00 JST)までの概算時間。「また来てね」を正直に出すため。
+function hoursToUpdate(){
+  const now=new Date();
+  let n=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate(),18,0,0));
+  if(now>=n) n.setUTCDate(n.getUTCDate()+1);
+  return Math.max(1,Math.round((n-now)/3600000));
+}
+function fillTpl(s,q){ return s.replace("{H}",hoursToUpdate()).replace("{q}",q||""); }
+function comebackBlock(q){
+  return `<div class="comeback"><b>${fillTpl(T[lang].cbT,q)}</b><div>${fillTpl(T[lang].cbB,q)}</div></div>`;
+}
 // 大きな数を日本語で丸める(高校生に読みやすく): 806336 → 約81万 / 9000 → 約9千
 function jaNum(n){ n=Number(n)||0;
   if(n>=100000000) return "約"+(Math.round(n/10000000)/10)+"億";
@@ -403,13 +429,14 @@ function buildInstIndex(){
 }
 function searchSchool(query){
   $pick.innerHTML=""; $sr.innerHTML=""; setStatus(null);
+  logSearch(query,"school");
   const q=query.trim().toLowerCase();
   const idx=buildInstIndex();
   const hits=idx.filter(x=>{
     const ja=x.ja.toLowerCase(), en=x.en.toLowerCase();
     return ja.includes(q)||en.includes(q)||(q.length>=2&&q.includes(en));
   }).sort((a,b)=>b.people.length-a.people.length);
-  if(!hits.length){ setStatus(T[lang].none,true); return; }
+  if(!hits.length){ $sr.innerHTML=comebackBlock(query); return; }
   if(hits.length===1){ loadSchool(hits[0]); return; }
   hits.slice(0,8).forEach(x=>{
     const b=document.createElement("button"); b.className="inst";
@@ -488,7 +515,8 @@ function kwNote(msg){ const out=document.getElementById("kresults"); out.innerHT
 function kwSearch(query){
   const {ids,terms}=resolveQuery(query);
   const out=document.getElementById("kresults"); out.innerHTML="";
-  if(!ids.size && !terms.length){ kwNote(T[lang].knone); return; }
+  logSearch(query,"kw");
+  if(!ids.size && !terms.length){ out.innerHTML=comebackBlock(query); return; }
   // ハイブリッド: field 一致で広く拾い、topics 文字列一致でピンポイント加点
   kMatched=kwAll().map(r=>{
     let score=0;
@@ -501,7 +529,7 @@ function kwSearch(query){
   }).filter(x=>x.score>0)
     .sort((a,b)=> b.score-a.score || (b.r.cited||b.r.cited_by_count||0)-(a.r.cited||a.r.cited_by_count||0))
     .map(x=>x.r);
-  if(!kMatched.length){ kwNote(T[lang].knone); return; }
+  if(!kMatched.length){ out.innerHTML=comebackBlock(query); return; }
   const head=document.createElement("div"); head.className="head";
   head.innerHTML=`<h2>“${query}”</h2><span class="count">${kMatched.length.toLocaleString()} ${T[lang].kcount}</span>`;
   out.appendChild(head);
@@ -509,6 +537,9 @@ function kwSearch(query){
   out.appendChild(note);
   out.appendChild(document.createElement("div")).id="kcards";
   kShown=0; moreK();
+  // 結果が少ないときは「また来てね」、十分あるときも控えめに成長を予告(がっかりさせない)
+  if(kMatched.length<5){ const d=document.createElement("div"); d.innerHTML=comebackBlock(query); out.appendChild(d.firstElementChild); }
+  else { const p=document.createElement("p"); p.className="growfoot"; p.textContent=fillTpl(T[lang].growFoot,query); out.appendChild(p); }
 }
 function moreK(){
   const box=document.getElementById("kcards");
