@@ -1,11 +1,12 @@
 name: initial-build
+
+# 日本版フルビルド (手動専用)。
+#  1. build_master.py  … universities_seed.csv(日本259校) → institutions.json
+#  2. sync_researchers.py … 各校 上位 MAX_PER_INST 名を OpenAlex から取得 → researchers/site_data
+# 認証は repository secret `OpenAlex`(無料APIキー)を OPENALEX_API_KEY に注入。
+# 自動起動はしない(push トリガー無し)。Actions 画面の "Run workflow" で実行。
+
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'scripts/**'
-      - 'data/universities_seed.csv'
-      - '.github/workflows/initial-build.yml'
   workflow_dispatch:
 
 permissions:
@@ -15,23 +16,25 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
       - name: Run build_master.py (institution resolution)
         run: python scripts/build_master.py
         env:
           PYTHONUNBUFFERED: 1
+          OPENALEX_API_KEY: ${{ secrets.OpenAlex }}
 
       - name: Run sync_researchers.py (OpenAlex data sync)
         run: python scripts/sync_researchers.py
         env:
           PYTHONUNBUFFERED: 1
-          MAX_PER_INST: "120"
+          OPENALEX_API_KEY: ${{ secrets.OpenAlex }}
+          MAX_PER_INST: "200"
 
       - name: Commit & push data changes
         run: |
@@ -41,6 +44,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to commit."
           else
-            git commit -m "build: sync researchers ($(date -u +'%Y-%m-%d %H:%M:%S UTC'))"
+            git commit -m "build: japan full rebuild ($(date -u +'%Y-%m-%d %H:%M:%S UTC'))"
             git push
           fi

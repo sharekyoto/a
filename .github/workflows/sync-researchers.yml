@@ -1,0 +1,42 @@
+name: sync-researchers
+
+# Nightly OpenAlex sync. Requires repository secret `OpenAlex` (your free API key).
+# Cost: ~$0.05/run (List+Filter), well within the $1/day free quota.
+
+on:
+  workflow_dispatch:          # lets you click "Run workflow"
+  schedule:
+    - cron: "0 18 * * *"      # 03:00 JST, nightly
+  # push トリガーは外した: スクリプト/データ更新のたびに勝手に走り、
+  # 意図しない再同期・コスト消費・初期ビルドとの競合を招くため。手動か夜間のみ。
+
+permissions:
+  contents: write             # needed to commit refreshed data back
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Sync researchers from OpenAlex
+        env:
+          OPENALEX_API_KEY: ${{ secrets.OpenAlex }}
+          MAX_PER_INST: "200"
+        run: python scripts/sync_researchers.py
+
+      - name: Commit updated data
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/researchers.json data/site_data.json
+          if git diff --staged --quiet; then
+            echo "No data changes."
+          else
+            git commit -m "data: nightly researcher sync"
+            git push
+          fi

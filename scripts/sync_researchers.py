@@ -35,13 +35,20 @@ RES_OUT = DATA / "researchers.json"
 SITE_OUT = DATA / "site_data.json"
 
 MAX_PER_INST = int(os.environ.get("MAX_PER_INST", "120"))
-PER_PAGE = 100
+PER_PAGE = 200   # OpenAlex 上限。コール数(=課金単位)を最小化するため最大に
 TODAY = time.strftime("%Y-%m-%d", time.gmtime())
+
+# OpenAlex now requires an API key (Feb 2026; polite pool / mailto removed).
+# The key is injected from the GitHub Actions secret via env var.
+API_KEY = os.environ.get("OPENALEX_API_KEY", "").strip()
 
 # --- HTTP ----------------------------------------------------------------
 def fetch(path, **params):
     """OpenAlex API fetch with exponential backoff."""
-    params["mailto"] = MAILTO
+    if API_KEY:
+        params["api_key"] = API_KEY
+    else:
+        params["mailto"] = MAILTO  # transitional fallback only; will stop working
     url = f"{API}{path}?{urllib.parse.urlencode(params)}"
 
     for attempt in range(5):
@@ -58,6 +65,11 @@ def fetch(path, **params):
                 print(f"  [429] waiting {wait}s...")
                 time.sleep(wait)
                 continue
+            elif e.code in (401, 403, 409):
+                raise RuntimeError(
+                    f"OpenAlex auth/credit error {e.code}. "
+                    f"Check the OPENALEX_API_KEY secret and daily $1 free quota."
+                ) from e
             else:
                 raise
         except Exception as e:
@@ -176,6 +188,7 @@ def fetch_researchers(inst):
 
 def main():
     print(f"\n=== {TODAY} ===\n")
+    print(f"Auth mode: {'api_key' if API_KEY else 'NO KEY (mailto fallback — will fail once enforced)'}")
 
     DATA.mkdir(parents=True, exist_ok=True)
 
