@@ -33,6 +33,7 @@ DATA = ROOT / "data"
 INST_IN = DATA / "institutions.json"
 RES_OUT = DATA / "researchers.json"
 SITE_OUT = DATA / "site_data.json"
+GROWTH = DATA / "growth.json"   # 自動拡大の状態(あれば env より優先)
 
 MAX_PER_INST = int(os.environ.get("MAX_PER_INST", "120"))
 PER_PAGE = 200   # OpenAlex 上限。コール数(=課金単位)を最小化するため最大に
@@ -203,9 +204,32 @@ def fetch_researchers(inst):
     return found
 
 
+def load_growth():
+    if GROWTH.exists():
+        try:
+            return json.loads(GROWTH.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    return None
+
+
+def advance_growth(g):
+    """毎回 max_per_inst を step ずつ ceiling まで引き上げて保存(=次回はもっと深く取る)。"""
+    nxt = min(int(g.get("ceiling", 600)), int(g.get("max_per_inst", 200)) + int(g.get("step", 100)))
+    g["max_per_inst"] = nxt
+    g["updated"] = TODAY
+    GROWTH.write_text(json.dumps(g, ensure_ascii=False, indent=2), encoding="utf-8")
+    return nxt
+
+
 def main():
+    global MAX_PER_INST
     print(f"\n=== {TODAY} ===\n")
     print(f"Auth mode: {'api_key' if API_KEY else 'NO KEY (mailto fallback — will fail once enforced)'}")
+    growth = load_growth()
+    if growth:                      # growth.json があれば env より優先(自動拡大)
+        MAX_PER_INST = int(growth.get("max_per_inst", MAX_PER_INST))
+        print(f"Growth: 各校 上位 {MAX_PER_INST} 名まで取得 (ceiling {growth.get('ceiling')})")
 
     DATA.mkdir(parents=True, exist_ok=True)
 
@@ -310,7 +334,10 @@ def main():
     print(f"\n=== Summary ===")
     print(f"New: {added} | Updated: {updated} | Unchanged: {unchanged} | Archived: {archived}")
     print(f"Total: {len(researchers)} ({len(site)} active)")
-    print(f"Written to: {RES_OUT.name}, {SITE_OUT.name}\n")
+    print(f"Written to: {RES_OUT.name}, {SITE_OUT.name}")
+    if growth:
+        nxt = advance_growth(growth)
+        print(f"Growth: 次回は各校 上位 {nxt} 名まで取得\n")
 
 
 if __name__ == "__main__":

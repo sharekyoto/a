@@ -1,0 +1,7 @@
+{
+  "note": "自動拡大の状態。夜間syncが毎回 max_per_inst を step ずつ ceiling まで増やし、各校の研究者を徐々に増やす。ブラウザに鍵を出さず無料枠内で『育つ』ための土台。",
+  "max_per_inst": 200,
+  "step": 100,
+  "ceiling": 600,
+  "updated": null
+}
