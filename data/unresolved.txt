@@ -1,7 +1,6 @@
 電気通信大学,The University of Electro-Communications
 旭川市立大学,Asahikawa City University
 川崎市立看護大学,Kawasaki City University of Nursing
-岐阜県立看護大学,Gifu College of Nursing
 静岡社会健康医学大学院大学,Graduate School of Public Health Shizuoka
 愛知県立芸術大学,Aichi University of the Arts
 滋賀県立大学,The University of Shiga Prefecture
