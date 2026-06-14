@@ -136,8 +136,8 @@
 </div>
 
 <script>
-const API="https://api.openalex.org";
-const MAILTO="sharekyoto@gmail.com";
+/* ライブAPIゼロ: ブラウザからは OpenAlex を一切叩かない。データは夜間ビルドの静的JSONのみ。
+   研究者ページへの https://openalex.org/<id> リンクは外部リンク(APIコールではない)。 */
 
 const T={
   ja:{eyebrow:"問いから、世界の師匠へ", title:"問いから探す大学検索",
@@ -147,7 +147,7 @@ const T={
     khint2:"気になる言葉を入れると、それを研究している先生が活動量順に出ます。言葉が浮かばないときは「問いから探す」へ。",
     knone:"その言葉に近い先生はまだ見つかりませんでした。別の言い方や「問いから探す」も試してみてください。",
     kcount:"人の先生",
-    go:"探す", hint:"例:京都大学 / MIT / ETH Zurich / Universidade de São Paulo",
+    go:"探す", hint:"例:京都大学 / 東北大学 / 早稲田大学 / 看護",
     pick:"どの学校ですか?", searching:"学校をさがしています…", loading:"よみこんでいます…",
     none:"見つかりませんでした。英語名でも試してみてください。", nores:"この学校の研究者はまだ見つかりませんでした。",
     err:"うまく接続できませんでした。少し待ってもう一度。",
@@ -162,7 +162,7 @@ const T={
     khint2:"Type a word and meet researchers working on it, sorted by activity. Not sure what to type? Try 'By question'.",
     knone:"No close match yet. Try another wording, or 'By question'.",
     kcount:"researchers",
-    go:"Search", hint:"e.g. Kyoto University / MIT / ETH Zurich / Universidade de São Paulo",
+    go:"Search", hint:"e.g. Kyoto University / Tohoku University / Waseda / nursing",
     pick:"Which one?", searching:"Looking up the school…", loading:"Loading…",
     none:"No match. Try the English name.", nores:"No researchers found for this school yet.",
     err:"Couldn't connect. Try again in a moment.",
@@ -171,7 +171,7 @@ const T={
     works:"works", cited:"cited", h:"h-index", profile:"OpenAlex",
     foot:"Data: OpenAlex (CC0 · global)"}
 };
-let lang="ja", SITE=null, QDATA=null, LEX=null;
+let lang="ja", SITE=null, QDATA=null, LEX=null, IDATA=null;
 
 /* ---- fallback sample so the page renders before the pipeline runs ---- */
 const SAMPLE_QUESTIONS={clusters:[
@@ -191,14 +191,11 @@ const SAMPLE_SITE={researchers:[
 function flag(cc){ if(!cc||cc.length!==2) return "🌐";
   return String.fromCodePoint(...[...cc.toUpperCase()].map(c=>127397+c.charCodeAt(0))); }
 
-async function getJSON(url){
-  const r=await fetch(url+(url.includes("?")?"&":"?")+"mailto="+encodeURIComponent(MAILTO));
-  if(!r.ok) throw new Error("HTTP "+r.status); return r.json();
-}
 async function loadData(){
   try{ QDATA=await (await fetch("./data/questions.json")).json(); }catch(e){ QDATA=SAMPLE_QUESTIONS; }
   try{ SITE=await (await fetch("./data/site_data.json")).json(); }catch(e){ SITE=SAMPLE_SITE; }
   try{ LEX=await (await fetch("./data/lexicon.json")).json(); }catch(e){ LEX={fields:{},subfields:{}}; }
+  try{ IDATA=await (await fetch("./data/institutions.json")).json(); }catch(e){ IDATA=[]; }
 }
 /* ---- lexicon helpers (output: 和訳 / input: 橋渡し) ---- */
 function fieldJa(fid){ const e=LEX&&LEX.fields&&LEX.fields[fid]; return e?(e.ja||e.en):fid; }
@@ -310,53 +307,63 @@ function card(r,fromSite){
   return c;
 }
 
-/* ---- school search (on-demand OpenAlex) ---- */
+/* ---- school search (STATIC: site_data + institutions.json, ライブAPIゼロ) ---- */
 const $st=document.getElementById("status"),$pick=document.getElementById("pick"),$sr=document.getElementById("sresults");
 function setStatus(m,err){ if(!m){$st.hidden=true;return;} $st.hidden=false; $st.textContent=m; $st.className="status"+(err?" err":""); }
-async function searchSchool(query){
-  $pick.innerHTML=""; $sr.innerHTML=""; setStatus(T[lang].searching);
-  try{
-    const d=await getJSON(`${API}/institutions?search=${encodeURIComponent(query)}&per_page=5&select=id,display_name,country_code,type,works_count`);
-    setStatus(null); const list=d.results||[];
-    if(!list.length){ setStatus(T[lang].none,true); return; }
-    if(list.length===1){ loadSchool(list[0]); return; }
-    list.forEach(inst=>{
-      const b=document.createElement("button"); b.className="inst";
-      b.innerHTML=`<span class="flag">${flag(inst.country_code)}</span><span><span class="nm">${inst.display_name}</span><br>
-        <span class="meta">${(inst.type||"").toUpperCase()} · ${(inst.works_count||0).toLocaleString()} works</span></span>`;
-      b.onclick=()=>{ $pick.innerHTML=""; loadSchool(inst); };
-      $pick.appendChild(b);
-    });
-  }catch(e){ setStatus(T[lang].err,true); }
+// 機関インデックスを一度だけ構築: institutions.json(和名)× site_data(所属研究者)を resolved_name で結合
+let SINDEX=null;
+function buildInstIndex(){
+  if(SINDEX) return SINDEX;
+  const rows=Array.isArray(SITE)?SITE:((SITE&&SITE.researchers)||[]);
+  const byInst={};
+  rows.forEach(r=>{ const k=r.inst||""; if(k){ (byInst[k]=byInst[k]||[]).push(r); } });
+  SINDEX=(IDATA||[]).map(i=>{
+    const en=i.resolved_name||i.name_en||"";
+    const people=byInst[en]||[];
+    return { ja:i.name_ja||"", en, pref:i.prefecture||"", country:(people[0]&&people[0].country)||"JP", people };
+  }).filter(x=>x.people.length);
+  return SINDEX;
 }
-let scursor="*",scur=null,stotal=0,sloaded=0;
-async function loadSchool(inst,append){
-  if(!append){ scur=inst; scursor="*"; sloaded=0; $sr.innerHTML=""; }
-  setStatus(T[lang].loading);
-  try{
-    const id=inst.id.split("/").pop();
-    const d=await getJSON(`${API}/authors?filter=last_known_institutions.id:${id}&sort=cited_by_count:desc&per_page=10&cursor=${encodeURIComponent(scursor)}&select=id,display_name,orcid,works_count,cited_by_count,summary_stats,topics`);
-    setStatus(null); scursor=d.meta?.next_cursor||null; stotal=d.meta?.count||0;
-    const ppl=(d.results||[]).map(a=>({id:a.id,name:a.display_name,inst:inst.display_name,country:inst.country_code,
-      works:a.works_count,cited:a.cited_by_count,h:a.summary_stats?.h_index,topics:(a.topics||[]).map(t=>t.display_name),orcid:a.orcid}));
-    if(!append && !ppl.length){ setStatus(T[lang].nores,true); return; }
-    if(!append){
-      const head=document.createElement("div"); head.className="head";
-      head.innerHTML=`<span class="flag">${flag(inst.country_code)}</span><h2>${inst.display_name}</h2>
-        <span class="count">${stotal.toLocaleString()} ${T[lang].inthis}</span>`;
-      $sr.appendChild(head);
-    }
-    ppl.forEach(r=>$sr.appendChild(card(r)));
-    sloaded+=ppl.length; renderSMore();
-  }catch(e){ setStatus(T[lang].err,true); }
+function searchSchool(query){
+  $pick.innerHTML=""; $sr.innerHTML=""; setStatus(null);
+  const q=query.trim().toLowerCase();
+  const idx=buildInstIndex();
+  const hits=idx.filter(x=>{
+    const ja=x.ja.toLowerCase(), en=x.en.toLowerCase();
+    return ja.includes(q)||en.includes(q)||(q.length>=2&&q.includes(en));
+  }).sort((a,b)=>b.people.length-a.people.length);
+  if(!hits.length){ setStatus(T[lang].none,true); return; }
+  if(hits.length===1){ loadSchool(hits[0]); return; }
+  hits.slice(0,8).forEach(x=>{
+    const b=document.createElement("button"); b.className="inst";
+    const nm=lang==="ja"?(x.ja||x.en):x.en;
+    b.innerHTML=`<span class="flag">${flag(x.country)}</span><span><span class="nm">${nm}</span><br>
+      <span class="meta">${x.pref?x.pref+" · ":""}${x.people.length.toLocaleString()} ${lang==="ja"?"名":"researchers"}</span></span>`;
+    b.onclick=()=>{ $pick.innerHTML=""; loadSchool(x); };
+    $pick.appendChild(b);
+  });
 }
-let $smore=null;
-function renderSMore(){
-  if($smore) $smore.remove();
-  if(!scursor||sloaded>=stotal) return;
-  $smore=document.createElement("button"); $smore.className="more"; $smore.textContent=T[lang].more;
-  $smore.onclick=async()=>{ $smore.disabled=true; $smore.innerHTML=`<span class="spin"></span>${T[lang].more}`; await loadSchool(scur,true); };
-  $sr.appendChild($smore);
+let sList=[], sShown=0, sInst=null;
+function loadSchool(x){
+  setStatus(null); $pick.innerHTML=""; $sr.innerHTML=""; sInst=x; sShown=0;
+  sList=x.people.slice().sort((a,b)=>(b.cited||b.cited_by_count||0)-(a.cited||a.cited_by_count||0));
+  const nm=lang==="ja"?(x.ja||x.en):x.en;
+  const head=document.createElement("div"); head.className="head";
+  head.innerHTML=`<span class="flag">${flag(x.country)}</span><h2>${nm}</h2>
+    <span class="count">${sList.length.toLocaleString()} ${T[lang].inthis}</span>`;
+  $sr.appendChild(head);
+  $sr.appendChild(document.createElement("div")).id="scards";
+  moreS();
+}
+function moreS(){
+  const box=document.getElementById("scards");
+  const old=document.getElementById("smore"); if(old) old.remove();
+  sList.slice(sShown,sShown+10).forEach(r=>box.appendChild(card(r,true)));
+  sShown+=10;
+  if(sShown<sList.length){
+    const b=document.createElement("button"); b.id="smore"; b.className="more"; b.textContent=T[lang].more;
+    b.onclick=moreS; $sr.appendChild(b);
+  }
 }
 document.getElementById("go").onclick=()=>{const q=document.getElementById("q").value.trim();if(q)searchSchool(q);};
 document.getElementById("q").addEventListener("keydown",e=>{if(e.key==="Enter"){const q=e.target.value.trim();if(q)searchSchool(q);}});
