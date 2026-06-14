@@ -317,10 +317,12 @@ function buildInstIndex(){
   const rows=Array.isArray(SITE)?SITE:((SITE&&SITE.researchers)||[]);
   const byInst={};
   rows.forEach(r=>{ const k=r.inst||""; if(k){ (byInst[k]=byInst[k]||[]).push(r); } });
-  SINDEX=(IDATA||[]).map(i=>{
-    const en=i.resolved_name||i.name_en||"";
+  // institutions.json は list でも {institutions:[…]} でも動くよう正規化
+  const list=Array.isArray(IDATA)?IDATA:((IDATA&&IDATA.institutions)||[]);
+  SINDEX=list.map(i=>{
+    const en=i.resolved_name||i.name||i.name_en||"";
     const people=byInst[en]||[];
-    return { ja:i.name_ja||"", en, pref:i.prefecture||"", country:(people[0]&&people[0].country)||"JP", people };
+    return { ja:i.name_ja||"", en, pref:i.prefecture||"", country:i.country||(people[0]&&people[0].country)||"JP", people };
   }).filter(x=>x.people.length);
   return SINDEX;
 }
@@ -346,6 +348,7 @@ function searchSchool(query){
 let sList=[], sShown=0, sInst=null;
 function loadSchool(x){
   setStatus(null); $pick.innerHTML=""; $sr.innerHTML=""; sInst=x; sShown=0;
+  x.people.forEach(p=>{ if(!p.country && x.country) p.country=x.country; });  // 国旗欠落を校の国で補完
   sList=x.people.slice().sort((a,b)=>(b.cited||b.cited_by_count||0)-(a.cited||a.cited_by_count||0));
   const nm=lang==="ja"?(x.ja||x.en):x.en;
   const head=document.createElement("div"); head.className="head";
