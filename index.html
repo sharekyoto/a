@@ -537,18 +537,24 @@ function kwSearch(query){
   const out=document.getElementById("kresults"); out.innerHTML="";
   logSearch(query,"kw");
   if(!ids.size && !terms.length){ out.innerHTML=comebackBlock(query); return; }
-  // ハイブリッド: field 一致で広く拾い、topics 文字列一致でピンポイント加点
-  kMatched=kwAll().map(r=>{
-    let score=0;
-    if(ids.size && (r.fields||[]).some(f=>ids.has(String(f)))) score+=1;
-    if(terms.length){
-      const tops=(r.topics||[]).map(t=>(typeof t==="string"?t:(t.display_name||"")).toLowerCase());
-      terms.forEach(term=>{ if(tops.some(tp=>tp.includes(term))) score+=2; });
-    }
-    return {r,score};
-  }).filter(x=>x.score>0)
-    .sort((a,b)=> b.score-a.score || (b.r.cited||b.r.cited_by_count||0)-(a.r.cited||a.r.cited_by_count||0))
-    .map(x=>x.r);
+  // 段階ランキング: まず「具体トピック一致(ドンピシャ)」、足りないときだけ「分野一致」で補完。
+  // これで "お笑い" のような語が分野(人文)全体を巻き込んで遠い研究者まで出る事故を防ぐ。
+  // 英語語は「単語の先頭」で一致させる(\b)。"art"→"heart" のような語中の偶然一致を防ぐ。
+  const termRes=terms.map(t=>new RegExp("\\b"+t.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")));
+  const scored=kwAll().map(r=>{
+    const blob=(r.topics||[]).map(t=>(typeof t==="string"?t:(t.display_name||""))).join(" ").toLowerCase();
+    let termHits=0; termRes.forEach(re=>{ if(re.test(blob)) termHits++; });
+    const fieldHit=(ids.size && (r.fields||[]).some(f=>ids.has(String(f))))?1:0;
+    return {r,termHits,fieldHit};
+  });
+  const byAct=(a,b)=>(b.r.cited||b.r.cited_by_count||0)-(a.r.cited||a.r.cited_by_count||0);
+  const topic=scored.filter(x=>x.termHits>0).sort((a,b)=> b.termHits-a.termHits || byAct(a,b));
+  if(topic.length>=5){
+    kMatched=topic.map(x=>x.r);                 // ドンピシャが十分 → 分野だけの人は出さない
+  }else{
+    const fieldOnly=scored.filter(x=>x.termHits===0 && x.fieldHit).sort(byAct);
+    kMatched=topic.map(x=>x.r).concat(fieldOnly.map(x=>x.r));  // 少ないときだけ分野で補完
+  }
   if(!kMatched.length){ out.innerHTML=comebackBlock(query); return; }
   const head=document.createElement("div"); head.className="head";
   head.innerHTML=`<h2>“${query}”</h2><span class="count">${kMatched.length.toLocaleString()} ${T[lang].kcount}</span>`;

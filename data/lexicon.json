@@ -635,7 +635,12 @@
       "quantum"
     ],
     "物理": [
-      "physic"
+      "quantum",
+      "particle physics",
+      "condensed matter",
+      "statistical physics",
+      "astrophys",
+      "optics"
     ],
     "数学": [
       "mathemat"
@@ -710,7 +715,9 @@
       "cell"
     ],
     "再生医療": [
-      "regenerat"
+      "regenerat",
+      "tissue engineering",
+      "stem cell"
     ],
     "がん": [
       "cancer",
@@ -737,8 +744,9 @@
       "drug"
     ],
     "医療": [
-      "medic",
-      "clinical"
+      "clinical",
+      "healthcare",
+      "medical practice"
     ],
     "医学": [
       "medic",
