@@ -74,7 +74,8 @@
   .topics{margin-top:13px;display:flex;flex-wrap:wrap;gap:7px}
   .chip{font-size:12.5px;background:rgba(44,122,107,.09);color:var(--teal);border:1px solid rgba(44,122,107,.22);border-radius:999px;padding:4px 11px}
   .subtopics{margin-top:8px;font-size:11.5px;color:#9AA0AE;font-family:"Space Mono",monospace;line-height:1.5}
-  .summary{margin-top:10px;font-size:13.5px;color:var(--ink-soft);line-height:1.6}
+  .summary{margin-top:10px;font-size:13.5px;color:var(--ink);line-height:1.6}
+  .vibe{margin-top:10px;font-size:12px;color:var(--teal)}
   .links{margin-top:13px;display:flex;gap:14px;font-size:13px;font-family:"Space Mono",monospace}
   .links a{color:var(--coral);text-decoration:none} .links a:hover{text-decoration:underline}
   .more{display:block;margin:8px auto 0;border:1.5px solid var(--ink);background:transparent;color:var(--ink);border-radius:14px;padding:12px 28px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit}
@@ -192,13 +193,27 @@ const SAMPLE_SITE={researchers:[
 function flag(cc){ if(!cc||cc.length!==2) return "🌐";
   return String.fromCodePoint(...[...cc.toUpperCase()].map(c=>127397+c.charCodeAt(0))); }
 
-async function loadData(){
+// 軽いファイルだけ先に読む(即・画面表示用)。重い site_data.json は待たない。
+async function loadLight(){
   try{ QDATA=await (await fetch("./data/questions.json")).json(); }catch(e){ QDATA=SAMPLE_QUESTIONS; }
-  try{ SITE=await (await fetch("./data/site_data.json")).json(); }catch(e){ SITE=SAMPLE_SITE; }
   try{ LEX=await (await fetch("./data/lexicon.json")).json(); }catch(e){ LEX={fields:{},subfields:{}}; }
   try{ IDATA=await (await fetch("./data/institutions.json")).json(); }catch(e){ IDATA=[]; }
-  // 研究者の日本語要約(ビルド時にAIで作り置き・任意)。無ければ分野チップにフォールバック。
   try{ const sd=await (await fetch("./data/summaries.json")).json(); SUM=(sd&&sd.summaries)||sd||{}; }catch(e){ SUM={}; }
+}
+// 重い研究者データ(約19MB)は裏で1回だけ読み込む。検索時はこれの完了を待つ。
+let siteReady=false, sitePromise=null;
+function loadSite(){
+  if(sitePromise) return sitePromise;
+  sitePromise=(async()=>{
+    try{ SITE=await (await fetch("./data/site_data.json")).json(); }catch(e){ SITE=SAMPLE_SITE; }
+    siteReady=true;
+  })();
+  return sitePromise;
+}
+async function ensureSite(box){   // 検索前に site_data の読み込み完了を保証(未完なら案内)
+  if(siteReady) return;
+  if(box){ box.innerHTML='<p class="status"><span class="spin"></span>'+(lang==="ja"?"研究者データを読み込み中…":"Loading researchers…")+'</p>'; }
+  await loadSite();
 }
 /* ---- lexicon helpers (output: 和訳 / input: 橋渡し) ---- */
 function fieldJa(fid){ const e=LEX&&LEX.fields&&LEX.fields[fid]; return e?(e.ja||e.en):fid; }
@@ -243,7 +258,7 @@ function renderTree(){
     const list=document.createElement("div"); list.className="qlist";
     c.questions.forEach(q=>{
       const b=document.createElement("button"); b.className="q"; b.textContent=q.q[lang];
-      b.onclick=()=>answerQuestion(q);
+      b.onclick=async()=>{ await ensureSite(document.getElementById("qresults")); answerQuestion(q); };
       list.appendChild(b);
     });
     d.appendChild(list); root.appendChild(d);
@@ -283,31 +298,36 @@ function moreQ(){
   }
 }
 
+// 大きな数を日本語で丸める(高校生に読みやすく): 806336 → 約81万 / 9000 → 約9千
+function jaNum(n){ n=Number(n)||0;
+  if(n>=100000000) return "約"+(Math.round(n/10000000)/10)+"億";
+  if(n>=10000) return "約"+Math.round(n/10000)+"万";
+  if(n>=1000) return "約"+(Math.round(n/100)/10)+"千";
+  return ""+n;
+}
 /* ---- card (works for both site_data and live OpenAlex shapes) ---- */
 function card(r,fromSite){
   const c=document.createElement("div"); c.className="card";
   const oid=r.id.replace("https://openalex.org/","");
   const name=r.name, inst=r.inst||r.inst_name||"", cc=r.country;
-  const works=r.works??r.works_count??0, cited=r.cited??r.cited_by_count??0, h=r.h??r.h_index??"–";
-  // 主: 日本語の分野チップ(field.ja) / 補助: 英語の具体トピックを薄く併記
+  const works=r.works??r.works_count??0, cited=r.cited??r.cited_by_count??0;
   const fieldChips=fieldLabels(r).map(j=>`<span class="chip">${j}</span>`).join("");
-  const subTopics=(r.topics||[]).slice(0,3)
-    .map(t=>typeof t==="string"?t:(t&&t.display_name)||"").filter(Boolean).join(" · ");
-  const sumJa=(r.id&&SUM&&SUM[r.id]&&SUM[r.id].ja)||"";   // AI日本語要約(あれば)
+  const sumJa=(r.id&&SUM&&SUM[r.id]&&SUM[r.id].ja)||"";   // AI日本語要約(あれば。無ければ分野チップが説明役)
   const orcid=r.orcid?`<a href="${r.orcid}" target="_blank" rel="noopener">ORCID ↗</a>`:"";
+  // 指標は「活躍度」風に。数値は丸めて日本語で、応援したくなるトーンに。
+  const vibe = lang!=="ja"
+    ? `${works.toLocaleString()} works · ${cited.toLocaleString()} cited`
+    : (cited>=1
+        ? `🌱 研究を ${jaNum(works)}本 ・ 🌍 世界で ${jaNum(cited)}回 注目された先生`
+        : `🌱 研究を ${jaNum(works)}本 発表 ・ これからが楽しみな先生`);
   c.innerHTML=`
     <div class="top">
       <div><h3 class="name"><a href="https://openalex.org/${oid}" target="_blank" rel="noopener">${name}</a></h3>
         <div class="aff">${flag(cc)} ${inst}</div></div>
-      <div class="stats">
-        <span><b>${works.toLocaleString()}</b>${T[lang].works}</span>
-        <span><b>${cited.toLocaleString()}</b>${T[lang].cited}</span>
-        <span><b>${h}</b>${T[lang].h}</span>
-      </div>
     </div>
     <div class="topics">${fieldChips}</div>
     ${sumJa?`<div class="summary">${sumJa}</div>`:""}
-    ${subTopics?`<div class="subtopics">${subTopics}</div>`:""}
+    <div class="vibe">${vibe}</div>
     <div class="links"><a href="https://openalex.org/${oid}" target="_blank" rel="noopener">${T[lang].profile} ↗</a>${orcid}</div>`;
   return c;
 }
@@ -373,8 +393,8 @@ function moreS(){
     b.onclick=moreS; $sr.appendChild(b);
   }
 }
-document.getElementById("go").onclick=()=>{const q=document.getElementById("q").value.trim();if(q)searchSchool(q);};
-document.getElementById("q").addEventListener("keydown",e=>{if(e.key==="Enter"){const q=e.target.value.trim();if(q)searchSchool(q);}});
+document.getElementById("go").onclick=async()=>{const q=document.getElementById("q").value.trim();if(q){await ensureSite($sr);searchSchool(q);}};
+document.getElementById("q").addEventListener("keydown",async e=>{if(e.key==="Enter"){const q=e.target.value.trim();if(q){await ensureSite($sr);searchSchool(q);}}});
 
 /* ---- keyword → field/subfield resolve (client-side, no live API, no key) ----
    lexicon.json の aliases/ja/en を走査して field/subfield ID を特定。
@@ -450,11 +470,12 @@ function moreK(){
     b.onclick=moreK; document.getElementById("kresults").appendChild(b);
   }
 }
-document.getElementById("kgo").onclick=()=>{const q=document.getElementById("kq").value.trim();if(q)kwSearch(q);};
-document.getElementById("kq").addEventListener("keydown",e=>{if(e.key==="Enter"){const q=e.target.value.trim();if(q)kwSearch(q);}});
+document.getElementById("kgo").onclick=async()=>{const q=document.getElementById("kq").value.trim();if(q){await ensureSite(document.getElementById("kresults"));kwSearch(q);}};
+document.getElementById("kq").addEventListener("keydown",async e=>{if(e.key==="Enter"){const q=e.target.value.trim();if(q){await ensureSite(document.getElementById("kresults"));kwSearch(q);}}});
 
 /* ---- boot ---- */
-loadData().then(applyLang);
+// 起動: 軽いデータで即描画 → 重い site_data は裏で先読み開始(検索時に間に合わせる)
+loadLight().then(()=>{ applyLang(); loadSite(); });
 </script>
 </body>
 </html>
