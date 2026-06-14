@@ -187,7 +187,7 @@ const T={
     qnote:"この問いとつながる分野の研究者を、活動量の多い順に表示しています。", inthis:"の研究者",
     works:"論文", cited:"被引用", h:"h指数", profile:"OpenAlex", dig:"この先生を深掘り",
     gcountry:"カ国", gschool:"学校", gpref:"都道府県", gppl:"人の研究者", grow_t:"育ち続ける地図", gmsg:"きみの検索が、次の誰かの探索の道しるべになる。", aboutlink:"このサイトについて ▸",
-    cbT:"「{q}」のまわりは、まだ育ち途中。", cbB:"この地図は毎晩少しずつ大きくなっています。次の更新まで約{H}時間。そのころにまた、会いに来てね。🌱", growFoot:"🌱 この地図は毎晩育っています。次の更新まで約{H}時間。",
+    cbT:"「{q}」のまわりは、まだ育ち途中。", cbB:"この地図は毎晩少しずつ大きくなっています。きみが探した学校は、次の更新で仲間入りすることもあるよ。次の更新まで約{H}時間。そのころにまた、会いに来てね。🌱", growFoot:"🌱 この地図は毎晩育っています。次の更新まで約{H}時間。",
     foot:"データ: OpenAlex（CC0・全世界）"},
   en:{eyebrow:"Curiosity is your greatest talent", title:"From your “why” to a mentor",
     sub:"Search a word that moves you and meet a researcher in Japan exploring it right now. Tap a name to dig deeper into their world — your curiosity grows this map.",
@@ -204,7 +204,7 @@ const T={
     qnote:"Researchers in fields connected to this question, sorted by research activity.", inthis:"researchers",
     works:"works", cited:"cited", h:"h-index", profile:"OpenAlex", dig:"Dig deeper",
     gcountry:"countries", gschool:"schools", gpref:"prefectures", gppl:"researchers", grow_t:"A map that keeps growing", gmsg:"your search becomes a signpost for the next explorer.", aboutlink:"About ▸",
-    cbT:"“{q}” is still growing here.", cbB:"This map gets a little bigger every night. Next update in about {H}h — come back and see then. 🌱", growFoot:"🌱 Growing every night. Next update in about {H}h.",
+    cbT:"“{q}” is still growing here.", cbB:"This map gets a little bigger every night — a school you searched for may even join next time. Next update in about {H}h, so come back and see. 🌱", growFoot:"🌱 Growing every night. Next update in about {H}h.",
     foot:"Data: OpenAlex (CC0 · global)"}
 };
 let lang="ja", SITE=null, QDATA=null, LEX=null, IDATA=null, SUM={};
@@ -353,8 +353,8 @@ function moreQ(){
 
 // Phase2: 検索語を無料Googleフォームに記録(鍵不要)。URL/フィールド未設定なら何もしない。
 // 設定後、夜間ジョブが「探された言葉/大学」を優先して充実させる。
-const SEARCH_LOG_URL="";    // 例: https://docs.google.com/forms/d/e/XXXX/formResponse
-const SEARCH_LOG_FIELD="";  // 例: entry.1234567890
+const SEARCH_LOG_URL="https://docs.google.com/forms/d/e/1FAIpQLSeEruM2ZutrpjBS5E4HiWezsWIRStPrN-QqtFGMBsdxqQZAlA/formResponse";
+const SEARCH_LOG_FIELD="entry.2065574169";
 function logSearch(q,type){
   if(!SEARCH_LOG_URL||!SEARCH_LOG_FIELD||!q) return;
   try{ const b=new URLSearchParams(); b.append(SEARCH_LOG_FIELD,(type||"")+":"+q);

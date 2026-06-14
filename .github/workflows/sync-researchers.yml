@@ -23,6 +23,13 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Grow from visitor searches (add searched schools)
+        env:
+          OPENALEX_API_KEY: ${{ secrets.OpenAlex }}
+          SEARCH_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSK6t-3ErOShO4KLnGcTuUkLdNf9VwUZxGMAV2ZB4FJonZX9XsaQMahdcruP_VVTifcT7_zBxoOiX-8/pub?output=csv"
+          NEW_SCHOOLS_PER_RUN: "15"
+        run: python scripts/grow_from_searches.py
+
       - name: Sync researchers from OpenAlex
         env:
           OPENALEX_API_KEY: ${{ secrets.OpenAlex }}
@@ -33,7 +40,7 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/researchers.json data/site_data.json data/growth.json
+          git add data/researchers.json data/site_data.json data/growth.json data/institutions.json data/universities_seed.csv data/search_demand.json
           if git diff --staged --quiet; then
             echo "No data changes."
           else
